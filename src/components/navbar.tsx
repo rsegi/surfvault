@@ -2,9 +2,12 @@ import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
-import { SessionAvatar } from "./sessionAvatar";
+import SessionAvatar from "./sessionAvatar";
+import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
 
-export const Navbar = () => {
+export default async function Navbar() {
+  const isSignedIn = await checkIsAuthenticated();
+
   return (
     <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6 justify-between">
       <Sheet>
@@ -46,10 +49,10 @@ export const Navbar = () => {
           </nav>
         </SheetContent>
       </Sheet>
-      <SessionAvatar />
+      <SessionAvatar isSignedIn={isSignedIn} />
     </header>
   );
-};
+}
 
 function MenuIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (

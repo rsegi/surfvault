@@ -1,6 +1,9 @@
-import { object, string } from "zod";
+import { string, z } from "zod";
 
-export const signInSchema = object({
+export const signInSchema = z.object({
+  name: string({ required_error: "El usuario es obligatorio" })
+    .min(3, "El usuario debe tener más de 2 carácteres")
+    .max(40, "El usuario debe tener menos de 40 carácteres"),
   username: string({ required_error: "El usuario es obligatorio" })
     .min(4, "El usuario debe tener más de 3 carácteres")
     .max(21, "El usuario debe tener menos de 21 carácteres"),
@@ -12,3 +15,5 @@ export const signInSchema = object({
     )
     .max(32, "La contraseña debe tener menos de 32 carácteres"),
 });
+
+export type SignIn = z.infer<typeof signInSchema>;

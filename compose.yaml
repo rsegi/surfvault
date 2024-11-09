@@ -1,15 +1,14 @@
-version: '3.9'
+name: surfvault
 services:
-  web:
+  nextjs:
+    container_name: nextjs
     build:
-      context: ../
-      dockerfile: compose/web.Dockerfile
+      context: ./
+      dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_CLIENTVAR: 'clientvar'
     ports:
       - 3000:3000
-    volumes:
-      - ../:/app
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/surfvault?schema=public
       - S3_ENDPOINT=minio
@@ -21,10 +20,18 @@ services:
       # the .env file and add the following variables:
       # - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       # - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
     depends_on:
       - db
       - minio
-    entrypoint: ["/bin/sh", "-c", "/app/wait-for-it.sh db:5432 -- npm run drizzle:push && npm run start"]
   db:
     image: postgres:15
     container_name: postgres
@@ -37,12 +44,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
   minio:
+    container_name: minio
     image: bitnami/minio:latest
     ports:
       - '9000:9000'
@@ -54,6 +57,4 @@ services:
       - minio_storage:/data
 volumes:
   postgres-data:
-    driver: local
   minio_storage:
-    driver: local

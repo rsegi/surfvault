@@ -9,20 +9,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { User } from "lucide-react";
+import NotLoggedIn from "@/components/notLoggedIn";
+import AccountContent from "@/components/accountContent";
 
-export const SessionAvatar = () => {
+interface SessionAvatarProps {
+  isSignedIn: boolean;
+}
+
+export default function SessionAvatar({ isSignedIn }: SessionAvatarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSignedIn,] = useState(false);
-
-  const handleSignIn = () => {
-    console.log("Sign In clicked");
-    setIsOpen(false);
-  };
-
-  const handleRegister = () => {
-    console.log("Register clicked");
-    setIsOpen(false);
-  };
 
   return (
     <div className="flex items-center justify-center min-h-10 bg-background">
@@ -36,41 +31,10 @@ export const SessionAvatar = () => {
             </Avatar>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56" align="end">
-          {isSignedIn ? (
-            <AccountContent />
-          ) : (
-            <AuthenticationContent
-              handleRegister={handleRegister}
-              handleSignIn={handleSignIn}
-            />
-          )}
+        <PopoverContent className="w-96" align="end">
+          {isSignedIn ? <AccountContent /> : <NotLoggedIn />}
         </PopoverContent>
       </Popover>
     </div>
   );
-};
-
-const AuthenticationContent = ({ handleSignIn, handleRegister }) => {
-  return (
-    <div className="grid gap-4">
-      <h3 className="font-semibold text-center">Cuenta</h3>
-      <div className="grid gap-2">
-        <Button onClick={handleSignIn} className="w-full">
-          Iniciar sesi&oacute;n
-        </Button>
-        <Button onClick={handleRegister} variant="outline" className="w-full">
-          Registrarse
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const AccountContent = () => {
-  return (
-    <div className="grid gap-4">
-      <h3 className="font-semibold text-center">Mi cuenta</h3>
-    </div>
-  );
-};
+}
