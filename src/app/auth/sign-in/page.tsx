@@ -1,12 +1,7 @@
-import { redirect } from "next/navigation";
+"use server";
+
 import SignInPage from "./signIn";
 
-export default function SignIn() {
-  const isAuthenticated = false;
-
-  if (isAuthenticated) {
-    redirect("/sessions");
-  } else {
-    return <SignInPage />;
-  }
+export default async function SignIn() {
+  return <SignInPage />;
 }

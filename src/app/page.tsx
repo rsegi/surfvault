@@ -7,7 +7,7 @@ export default function Page() {
   const router = useRouter();
 
   return (
-    <div className="flex pt-24 justify-center min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
+    <div className="flex pt-24 justify-center min-h-screen">
       <div className="text-center space-y-6 p-8 max-w-2xl">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
           Bienvenido a <strong>SurfVault</strong>

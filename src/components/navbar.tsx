@@ -18,34 +18,46 @@ export default async function Navbar() {
         </SheetTrigger>
         <SheetContent side="left">
           <nav className="grid gap-2 py-6">
-            <Link
-              href="#"
-              className="flex w-full items-center py-2 text-lg font-semibold"
-              prefetch={false}
-            >
-              Subir sesi&oacute;n
-            </Link>
-            <Link
-              href="#"
-              className="flex w-full items-center py-2 text-lg font-semibold"
-              prefetch={false}
-            >
-              Mis sesiones
-            </Link>
-            <Link
-              href="#"
-              className="flex w-full items-center py-2 text-lg font-semibold"
-              prefetch={false}
-            >
-              Mi mapa
-            </Link>
-            <Link
-              href="#"
-              className="flex w-full items-center py-2 text-lg font-semibold"
-              prefetch={false}
-            >
-              Mi cuenta
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="#"
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  prefetch={false}
+                >
+                  Subir sesi&oacute;n
+                </Link>
+                <Link
+                  href="/sessions"
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  prefetch={false}
+                >
+                  Mis sesiones
+                </Link>
+                <Link
+                  href="#"
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  prefetch={false}
+                >
+                  Mi mapa
+                </Link>
+                <Link
+                  href="#"
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  prefetch={false}
+                >
+                  Mi cuenta
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/auth/sign-in"
+                className="flex w-full items-center py-2 text-lg font-semibold"
+                prefetch={false}
+              >
+                Iniciar sesi&oacute;n
+              </Link>
+            )}
           </nav>
         </SheetContent>
       </Sheet>

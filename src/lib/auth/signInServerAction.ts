@@ -2,6 +2,8 @@
 
 import { signIn } from "@/lib/auth/auth";
 import { SignIn, signInSchema } from "../zod";
+import { CredentialsSignin } from "next-auth";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 type AuthResponse = {
   message: string;
@@ -10,7 +12,6 @@ type AuthResponse = {
 
 export const handleGoogleSignIn = async () => {
   try {
-    console.log("Google SignIn");
     await signIn("google", { redirectTo: "/sessions" });
   } catch (error) {
     throw error;
@@ -21,10 +22,6 @@ export const handleCredentialsSignIn = async (
 ): Promise<AuthResponse> => {
   try {
     const { name, password, username } = values;
-    console.log("Credentials SignIn");
-    console.log("Name", name);
-    console.log("Username", username);
-    console.log("Password", password);
     const parsed = await signInSchema.safeParseAsync({
       name,
       username,
@@ -46,7 +43,15 @@ export const handleCredentialsSignIn = async (
 
     return { message: "Usuario auntenticado" };
   } catch (error) {
-    console.log(`An error occurred: ${error}`);
+    if (error instanceof CredentialsSignin) {
+      return {
+        message: `Ha ocurrido un  error:`,
+        errors: { db: error.message },
+      };
+    }
+    if (isRedirectError(error)) {
+      return { message: "Usuario auntenticado" };
+    }
     return {
       message: `Ha ocurrido un  error: ${error}`,
     };

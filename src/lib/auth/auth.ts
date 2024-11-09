@@ -63,6 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name,
           };
         } catch (error) {
+          console.log(error);
           throw error;
         }
       },
