@@ -22,7 +22,7 @@ export default async function RootLayout({
     <html lang="es">
       <body>
         <SessionProvider session={session}>
-          <SidebarProvider>
+          <SidebarProvider defaultOpen={false}>
             <AppSidebar />
             <SidebarInset>
               <Navbar />
