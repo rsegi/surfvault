@@ -22,6 +22,13 @@ export default function NotLoggedIn() {
           >
             Inicia Sesi&oacute;n
           </Button>
+          <Button
+            className="w-full text-lg py-6"
+            size="lg"
+            onClick={() => router.push("/auth/sign-up")}
+          >
+            Reg&iacute;strate
+          </Button>
         </div>
       </div>
     </div>

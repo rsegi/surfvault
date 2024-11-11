@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter();
   const { status } = useSession();
 
@@ -42,7 +42,7 @@ export default function SignInPage() {
   const form = useForm<SignIn>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      name: "default",
+      name: "",
       username: "",
       password: "",
     },
@@ -56,18 +56,18 @@ export default function SignInPage() {
 
     if (result?.error) {
       if (result.error === "CredentialsSignin") {
-        toast.error("Error de inicio de sesión", {
-          description: "Credenciales inválidas",
+        toast.error("Error de registro", {
+          description: "El usuario ya existe",
         });
       } else {
-        toast.error("Error de inicio de sesión", {
+        toast.error("Error de registro", {
           description: result.error,
         });
       }
       return;
     }
 
-    toast.success("Inicio de sesión exitoso");
+    toast.success("Registro exitoso");
     router.push("/sessions");
   };
 
@@ -76,7 +76,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md font-sans">
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-center">
-            Iniciar Sesi&oacute;n
+            Registrarse
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-8 text-sm text-foreground">
@@ -120,6 +120,19 @@ export default function SignInPage() {
               />
               <FormField
                 control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -141,16 +154,16 @@ export default function SignInPage() {
                 type="submit"
                 className="w-full text-lg"
               >
-                {form.formState.isSubmitting ? "Iniciando sesión" : "Continuar"}
+                {form.formState.isSubmitting ? "Registrando" : "Continuar"}
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            ¿No tienes una cuenta?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link href="/auth/sign-up" className="text-primary hover:underline">
-              Regístrate aquí
+              Inicia sesi&oacute;n aqu&iacute;
             </Link>
           </p>
         </CardFooter>

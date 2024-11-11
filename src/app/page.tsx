@@ -19,7 +19,7 @@ export default function Page() {
         <Button
           size="lg"
           className="text-lg px-8 py-6"
-          onClick={() => router.push("auth/sign-in")}
+          onClick={() => router.push("auth/sign-up")}
         >
           Empieza aqu&iacute;
         </Button>

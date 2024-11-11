@@ -1,88 +1,18 @@
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { JSX, SVGProps } from "react";
+"use client";
+
 import SessionAvatar from "./sessionAvatar";
-import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
+import Image from "next/image";
+import logoFull from "../../public/logo-text.svg";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default async function Navbar() {
-  const isSignedIn = await checkIsAuthenticated();
-
+export default function Navbar() {
   return (
-    <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6 justify-between">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon">
-            <MenuIcon className="h-6 w-6" aria-label="menu" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left">
-          <nav className="grid gap-2 py-6">
-            {isSignedIn ? (
-              <>
-                <Link
-                  href="#"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                  prefetch={false}
-                >
-                  Subir sesi&oacute;n
-                </Link>
-                <Link
-                  href="/sessions"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                  prefetch={false}
-                >
-                  Mis sesiones
-                </Link>
-                <Link
-                  href="#"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                  prefetch={false}
-                >
-                  Mi mapa
-                </Link>
-                <Link
-                  href="#"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                  prefetch={false}
-                >
-                  Mi cuenta
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/auth/sign-in"
-                className="flex w-full items-center py-2 text-lg font-semibold"
-                prefetch={false}
-              >
-                Iniciar sesi&oacute;n
-              </Link>
-            )}
-          </nav>
-        </SheetContent>
-      </Sheet>
-      <SessionAvatar isSignedIn={isSignedIn} />
+    <header className="flex h-20 shrink-0 items-center px-4 md:px-6 justify-between bg-primary">
+      <div className="flex items-center">
+        <SidebarTrigger className="bg-primary text-white hover:bg-secondary hover:text-black p-2 rounded-md mr-4" />
+        <Image src={logoFull} alt="surfvault logo and text" />
+      </div>
+      <SessionAvatar />
     </header>
-  );
-}
-
-function MenuIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
   );
 }
