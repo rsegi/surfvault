@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { SessionProvider } from "next-auth/react";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/auth";
 import { Toaster } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";

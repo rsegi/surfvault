@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/components/icons";
-import React, { useEffect } from "react";
-import { handleGoogleSignIn } from "@/lib/auth/signInServerAction";
+import React from "react";
+import {
+  handleCredentialsSignIn,
+  handleGoogleSignIn,
+} from "@/lib/auth/signInServerAction";
 import {
   Form,
   FormControl,
@@ -17,8 +20,6 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { SignIn, signInSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Card,
@@ -30,45 +31,25 @@ import {
 import Link from "next/link";
 
 export default function SignInPage() {
-  const router = useRouter();
-  const { status } = useSession();
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/sessions");
-    }
-  }, [router, status]);
-
   const form = useForm<SignIn>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      name: "default",
       username: "",
       password: "",
     },
   });
 
   const onSubmit = async () => {
-    const result = await signIn("credentials", {
-      ...form.getValues(),
-      redirect: false,
-    });
+    const result = await handleCredentialsSignIn(form.getValues());
 
-    if (result?.error) {
-      if (result.error === "CredentialsSignin") {
-        toast.error("Error de inicio de sesión", {
-          description: "Credenciales inválidas",
-        });
-      } else {
-        toast.error("Error de inicio de sesión", {
-          description: result.error,
-        });
-      }
-      return;
+    if (result.error) {
+      toast.error("Error de inicio de sesión", {
+        description: result.error,
+      });
+    } else {
+      toast.success(result.success);
+      window.location.href = "/";
     }
-
-    toast.success("Inicio de sesión exitoso");
-    router.push("/sessions");
   };
 
   return (

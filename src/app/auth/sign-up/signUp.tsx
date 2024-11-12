@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/components/icons";
-import React, { useEffect } from "react";
+import React from "react";
 import { handleGoogleSignIn } from "@/lib/auth/signInServerAction";
 import {
   Form,
@@ -15,10 +15,9 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { SignIn, signInSchema } from "@/lib/zod";
+import { SignUp, signUpSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Card,
@@ -28,19 +27,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { signUp } from "@/lib/auth/signUpServerAction";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { status } = useSession();
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/sessions");
-    }
-  }, [router, status]);
-
-  const form = useForm<SignIn>({
-    resolver: zodResolver(signInSchema),
+  const form = useForm<SignUp>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: "",
       username: "",
@@ -49,10 +42,7 @@ export default function SignUpPage() {
   });
 
   const onSubmit = async () => {
-    const result = await signIn("credentials", {
-      ...form.getValues(),
-      redirect: false,
-    });
+    const result = await signUp(form.getValues());
 
     if (result?.error) {
       if (result.error === "CredentialsSignin") {

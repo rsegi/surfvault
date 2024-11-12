@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/auth";
 
 export const checkIsAuthenticated = async () => {
   const session = await auth();

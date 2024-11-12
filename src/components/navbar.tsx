@@ -1,5 +1,3 @@
-"use client";
-
 import SessionAvatar from "./sessionAvatar";
 import Image from "next/image";
 import logoFull from "../../public/logo-text.svg";
