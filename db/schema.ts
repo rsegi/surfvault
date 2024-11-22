@@ -4,6 +4,10 @@ import {
   text,
   primaryKey,
   integer,
+  decimal,
+  date,
+  time,
+  real,
 } from "drizzle-orm/pg-core";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -48,3 +52,36 @@ export const accounts = pgTable(
     }),
   })
 );
+
+export const sesssions = pgTable("session", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  latitude: decimal("latitude", { precision: 7, scale: 5 }).notNull(),
+  longitude: decimal("longitude", { precision: 8, scale: 5 }).notNull(),
+  title: text("title").notNull(),
+  location: text("location").notNull(),
+  date: date("date").notNull(),
+});
+
+export const surfConditions = pgTable("surfCondition", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("sessionId")
+    .notNull()
+    .references(() => sesssions.id, { onDelete: "cascade" }),
+  dateTime: time("time").notNull(),
+  waveHeight: real("waveHeight"),
+  waveDirection: integer("waveDirection"),
+  wavePeriod: integer("wavePeriod"),
+  windSpeed: real("windSpeed"),
+  windDirection: integer("windDirection"),
+  windGusts: real("windGusts"),
+  temperature: integer("temperature"),
+  waterTemperature: integer("waterTemperature"),
+  weatherCode: integer("weatherCode"),
+});

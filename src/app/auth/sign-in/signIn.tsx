@@ -29,6 +29,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 export default function SignInPage() {
   const form = useForm<SignIn>({
@@ -48,7 +49,7 @@ export default function SignInPage() {
       });
     } else {
       toast.success(result.success);
-      window.location.href = "/";
+      window.location.href = DEFAULT_LOGIN_REDIRECT;
     }
   };
 

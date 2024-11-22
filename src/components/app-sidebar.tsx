@@ -20,11 +20,11 @@ import Link from "next/link";
 const authenticatedItems = [
   {
     title: "Subir sesión",
-    url: "#",
+    url: "/sessions/upload",
   },
   {
     title: "Mis sesiones",
-    url: "#",
+    url: "/sessions",
   },
   {
     title: "Mi mapa",
@@ -66,8 +66,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                  <SidebarMenuButton>
+                    <Link href={item.url} prefetch={false}>
                       {/* <item.icon /> */}
                       {item.title}
                     </Link>
