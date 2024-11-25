@@ -31,6 +31,7 @@ import { signUp } from "@/lib/auth/signUpServerAction";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<SignUp>({
     resolver: zodResolver(signUpSchema),
@@ -41,24 +42,27 @@ export default function SignUpPage() {
     },
   });
 
-  const onSubmit = async () => {
-    const result = await signUp(form.getValues());
+  const onSubmit = async (data: SignUp) => {
+    try {
+      setIsLoading(true);
+      const result = await signUp(data);
 
-    if (result?.error) {
-      if (result.error === "CredentialsSignin") {
-        toast.error("Error de registro", {
-          description: "El usuario ya existe",
-        });
-      } else {
+      if (result?.error) {
         toast.error("Error de registro", {
           description: result.error,
         });
+        return;
       }
-      return;
-    }
 
-    toast.success("Registro exitoso");
-    router.push("/sessions");
+      toast.success("Registro exitoso");
+      router.push("/sessions");
+    } catch {
+      toast.error("Error de registro", {
+        description: "Ha ocurrido un error inesperado",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -77,6 +81,7 @@ export default function SignUpPage() {
             variant="outline"
             className="w-full font-semibold"
             onClick={() => handleGoogleSignIn()}
+            disabled={isLoading}
           >
             <Icons.google className="mr-2 h-4 w-4" />
             Continuar con Google
@@ -140,11 +145,11 @@ export default function SignUpPage() {
                 )}
               />
               <Button
-                disabled={form.formState.isSubmitting}
+                disabled={isLoading}
                 type="submit"
                 className="w-full text-lg"
               >
-                {form.formState.isSubmitting ? "Registrando" : "Continuar"}
+                {isLoading ? "Registrando..." : "Continuar"}
               </Button>
             </form>
           </Form>
@@ -152,7 +157,7 @@ export default function SignUpPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             ¿Ya tienes una cuenta?{" "}
-            <Link href="/auth/sign-up" className="text-primary hover:underline">
+            <Link href="/auth/sign-in" className="text-primary hover:underline">
               Inicia sesi&oacute;n aqu&iacute;
             </Link>
           </p>

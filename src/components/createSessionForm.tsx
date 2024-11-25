@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Play } from "lucide-react";
-import L, { LatLng } from "leaflet";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,24 +33,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import markerIconPng from "leaflet/dist/images/marker-icon.png";
-import markerIconShadowPng from "leaflet/dist/images/marker-shadow.png";
+
 import Image from "next/image";
 import LocationSearch from "./ui/locationSearch";
-
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIconPng,
-  shadowUrl: markerIconShadowPng,
-  iconRetinaUrl: markerIconPng,
-});
+import LocationMarker from "./locationMarker";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { toast } from "sonner";
+import { createSession } from "@/lib/createSessionServerAction";
 
 const createSessionSchema = z.object({
   title: z.string().min(5, {
@@ -68,50 +58,20 @@ const createSessionSchema = z.object({
   }),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
-  files: z.array(z.instanceof(File)).optional(),
 });
 
-interface LocationMarkerProps {
-  latitude: number;
-  longitude: number;
-  setLatitude: (latitude: number) => void;
-  setLongitude: (longitude: number) => void;
-}
-
-type FileWithPreview = File & { preview: string; type: string };
-
-function LocationMarker({
-  latitude,
-  longitude,
-  setLatitude,
-  setLongitude,
-}: LocationMarkerProps) {
-  const map = useMap();
-  const [position, setPosition] = useState<LatLng | null>(null);
-
-  useMapEvents({
-    click: (e: { latlng: LatLng }) => {
-      setLatitude(e.latlng.lat);
-      setLongitude(e.latlng.lng);
-      setPosition(e.latlng);
-    },
-  });
-
-  useEffect(() => {
-    if (latitude && longitude) {
-      const newCenter = new LatLng(latitude, longitude);
-      setPosition(newCenter);
-      map.setView(newCenter, map.getZoom());
-    }
-  }, [latitude, longitude, map]);
-
-  return position === null ? null : <Marker position={position}></Marker>;
-}
+type FileWithPreview = {
+  file: File;
+  preview: string;
+  fileType: string;
+};
 
 export default function CreateSessionModal() {
+  const user = useCurrentUser();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof createSessionSchema>>({
     resolver: zodResolver(createSessionSchema),
@@ -125,22 +85,57 @@ export default function CreateSessionModal() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof createSessionSchema>) => {
-    console.log(values);
-    setOpen(false);
-    setStep(1);
-    form.reset();
-    setFiles([]);
+  const onSubmit = async (values: z.infer<typeof createSessionSchema>) => {
+    console.log("Form submitted with values:", values);
+    if (!user?.id) {
+      console.error("User not authenticated");
+      toast.error("You must be logged in to create a session.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("userId", user.id);
+      formData.append("latitude", values.latitude.toString());
+      formData.append("longitude", values.longitude.toString());
+      formData.append("title", values.title);
+      formData.append("date", format(values.date, "yyyy-MM-dd"));
+      formData.append("time", values.time);
+      formData.append("location", values.location);
+
+      files.forEach((fileWithPreview, index) => {
+        formData.append(`file${index}`, fileWithPreview.file);
+      });
+
+      console.log("Submitting form data:", Object.fromEntries(formData));
+      const result = await createSession(formData);
+      console.log("Session creation result:", result);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setOpen(false);
+      setStep(1);
+      form.reset();
+      setFiles([]);
+      toast.success("Session created successfully!");
+    } catch (error) {
+      console.error("Error creating session:", error);
+      toast.error("Failed to create session. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files).map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-          type: file.type.startsWith("image/") ? "image" : "video",
-        })
-      );
+      const newFiles = Array.from(e.target.files).map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        fileType: file.type.startsWith("image/") ? "image" : "video",
+      }));
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     }
   };
@@ -163,10 +158,7 @@ export default function CreateSessionModal() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 h-full flex flex-col"
-          >
+          <form className="space-y-4 h-full flex flex-col">
             {step === 1 && (
               <div className="space-y-4 flex-grow overflow-y-auto">
                 <FormField
@@ -199,7 +191,7 @@ export default function CreateSessionModal() {
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(field.value, "yyyy-MM-dd")
                               ) : (
                                 <span>Pick a date</span>
                               )}
@@ -296,11 +288,11 @@ export default function CreateSessionModal() {
                 </div>
                 {files.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
-                    {files.map((file, index) => (
+                    {files.map((fileWithPreview, index) => (
                       <div key={index} className="relative aspect-video">
-                        {file.type === "image" ? (
+                        {fileWithPreview.fileType === "image" ? (
                           <Image
-                            src={file.preview}
+                            src={fileWithPreview.preview}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-full object-cover rounded"
                             fill
@@ -331,7 +323,13 @@ export default function CreateSessionModal() {
                   Next
                 </Button>
               ) : (
-                <Button type="submit">Create Session</Button>
+                <Button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={form.handleSubmit(onSubmit)}
+                >
+                  {isSubmitting ? "Creating..." : "Create Session"}
+                </Button>
               )}
             </DialogFooter>
           </form>

@@ -53,7 +53,7 @@ export const accounts = pgTable(
   })
 );
 
-export const sesssions = pgTable("session", {
+export const sessions = pgTable("session", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -63,7 +63,6 @@ export const sesssions = pgTable("session", {
   latitude: decimal("latitude", { precision: 7, scale: 5 }).notNull(),
   longitude: decimal("longitude", { precision: 8, scale: 5 }).notNull(),
   title: text("title").notNull(),
-  location: text("location").notNull(),
   date: date("date").notNull(),
 });
 
@@ -73,7 +72,7 @@ export const surfConditions = pgTable("surfCondition", {
     .$defaultFn(() => crypto.randomUUID()),
   sessionId: text("sessionId")
     .notNull()
-    .references(() => sesssions.id, { onDelete: "cascade" }),
+    .references(() => sessions.id, { onDelete: "cascade" }),
   dateTime: time("time").notNull(),
   waveHeight: real("waveHeight"),
   waveDirection: integer("waveDirection"),

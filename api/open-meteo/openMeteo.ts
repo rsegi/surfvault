@@ -1,11 +1,12 @@
-const BASE_URL = "https://api.open-meteo.com/v1/";
+const MARINE_BASE_URL = "https://marine-api.open-meteo.com/v1/";
+const FORECAST_BASE_URL = "https://api.open-meteo.com/v1/";
 
 export const getMarineDataFromLocationAndDate = async (
   latitude: string,
   longitude: string,
   date: string
 ): Promise<MarineDataResponse | undefined> => {
-  const url = `${BASE_URL}marine?latitude=${latitude}&longitude=${longitude}&hourly=swell_wave_height,swell_wave_direction,swell_wave_period&start_date=${date}&end_date=${date}&timezone=auto`;
+  const url = `${MARINE_BASE_URL}marine?latitude=${latitude}&longitude=${longitude}&hourly=swell_wave_height,swell_wave_direction,swell_wave_period&start_date=${date}&end_date=${date}&timezone=auto`;
   try {
     const response = await fetch(url);
 
@@ -27,7 +28,7 @@ export const getForecastDataFromLocationAndDate = async (
   longitude: string,
   date: string
 ): Promise<ForecastDataResponse | undefined> => {
-  const url = `${BASE_URL}forecast?latitude=${latitude}&longitude=${longitude}&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,weathercode,soil_temperature_0cm&cell_selection=sea&start_date=${date}&end_date=${date}&timezone=auto`;
+  const url = `${FORECAST_BASE_URL}forecast?latitude=${latitude}&longitude=${longitude}&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,weathercode,soil_temperature_0cm&cell_selection=sea&start_date=${date}&end_date=${date}&timezone=auto`;
   try {
     const response = await fetch(url);
 
@@ -65,7 +66,7 @@ type ForecastDataResponse = {
   hourly_units: {
     time: string;
     temperature_2m: string;
-    weather_code: string;
+    weathercode: string;
     wind_speed_10m: string;
     wind_direction_10m: string;
     soil_temperature_0cm: string;
@@ -73,7 +74,7 @@ type ForecastDataResponse = {
   hourly: {
     time: string[];
     temperature_2m: number[];
-    weather_code: number[];
+    weathercode: number[];
     wind_speed_10m: number[];
     wind_direction_10m: number[];
     soil_temperature_0cm: number[];

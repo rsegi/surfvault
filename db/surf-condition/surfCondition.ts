@@ -2,10 +2,18 @@ import {
   getForecastDataFromLocationAndDate,
   getMarineDataFromLocationAndDate,
 } from "api/open-meteo/openMeteo";
-import { db } from "db";
 import { surfConditions } from "db/schema";
+import { ExtractTablesWithRelations } from "drizzle-orm";
+import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import * as schema from "../schema";
 
 export const createSurfConditions = async (
+  tx: PgTransaction<
+    NodePgQueryResultHKT,
+    typeof schema,
+    ExtractTablesWithRelations<typeof schema>
+  >,
   sessionId: string,
   latitude: string,
   longitude: string,
@@ -17,7 +25,7 @@ export const createSurfConditions = async (
     date
   );
 
-  if (generatedSurfConditions.length !== 23) {
+  if (generatedSurfConditions.length !== 24) {
     console.error("Surf conditions weren't generated for a full day.");
     return;
   }
@@ -30,7 +38,7 @@ export const createSurfConditions = async (
   ) as SurfConditionWithSession[];
 
   try {
-    await db.insert(surfConditions).values(surfConditionsWithSession);
+    await tx.insert(surfConditions).values(surfConditionsWithSession);
   } catch (e) {
     console.error("Error creating session:", e);
   }
@@ -57,13 +65,15 @@ const generateSurfConditions = async (
   if (marineData && forecastData) {
     for (let entry = 0; entry < marineData.hourly.time.length; entry++) {
       const hourlySessionData: GeneratedSurfCondition = {
-        dateTime: marineData.hourly.time[entry],
+        dateTime: marineData.hourly.time[entry].split("T")[1],
         waveHeight: marineData.hourly.swell_wave_height[entry],
         waveDirection: marineData.hourly.swell_wave_direction[entry],
-        wavePeriod: marineData.hourly.swell_wave_period[entry],
-        temperature: forecastData.hourly.temperature_2m[entry],
-        waterTemperature: forecastData.hourly.soil_temperature_0cm[entry],
-        weatherCode: forecastData.hourly.weather_code[entry],
+        wavePeriod: Math.round(marineData.hourly.swell_wave_period[entry]),
+        temperature: Math.round(forecastData.hourly.temperature_2m[entry]),
+        waterTemperature: Math.round(
+          forecastData.hourly.soil_temperature_0cm[entry]
+        ),
+        weatherCode: forecastData.hourly.weathercode[entry],
         windDirection: forecastData.hourly.wind_direction_10m[entry],
         windGusts: forecastData.hourly.wind_gusts_10m[entry],
         windSpeed: forecastData.hourly.wind_speed_10m[entry],

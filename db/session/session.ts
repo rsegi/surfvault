@@ -1,33 +1,38 @@
 import { createSurfConditions } from "db/surf-condition/surfCondition";
-import { db } from "db";
-import { sesssions } from "db/schema";
+import { sessions } from "db/schema";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import { ExtractTablesWithRelations } from "drizzle-orm";
+import * as schema from "../schema";
 
-type NewSession = typeof sesssions.$inferInsert;
-
-export const createSession = async (
+export const insertSession = async (
+  tx: PgTransaction<
+    NodePgQueryResultHKT,
+    typeof schema,
+    ExtractTablesWithRelations<typeof schema>
+  >,
   userId: string,
   latitude: number,
   longitude: number,
   title: string,
-  location: string,
   date: string
 ) => {
   const parsedLatitude = latitude.toString();
   const parsedLongitude = longitude.toString();
   try {
-    const [createdSession] = await db
-      .insert(sesssions)
+    const [createdSession] = await tx
+      .insert(sessions)
       .values({
         userId,
         latitude: parsedLatitude,
         longitude: parsedLongitude,
         title,
-        location,
         date,
       })
-      .returning({ createdSession: sesssions.id });
+      .returning({ createdSession: sessions.id });
 
     await createSurfConditions(
+      tx,
       createdSession.createdSession,
       parsedLatitude,
       parsedLongitude,
