@@ -23,26 +23,32 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
 import Image from "next/image";
-import LocationSearch from "./ui/locationSearch";
-import LocationMarker from "./locationMarker";
+import LocationSearch from "@/components/ui/locationSearch";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
 import { createSession } from "@/lib/createSessionServerAction";
 import { useRouter } from "next/navigation";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const LocationMarker = dynamic(() => import("@/components/locationMarker"), {
+  ssr: false,
+});
 
 const createSessionSchema = z.object({
   title: z.string().min(5, {
@@ -67,10 +73,9 @@ type FileWithPreview = {
   fileType: string;
 };
 
-export default function CreateSessionModal() {
+export default function CreateSessionPage() {
   const user = useCurrentUser();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,17 +120,13 @@ export default function CreateSessionModal() {
         throw new Error(result.error);
       }
 
-      setOpen(false);
-      setStep(1);
-      form.reset();
-      setFiles([]);
       toast.success("Session created successfully!");
+      router.push("/sessions");
     } catch (error) {
       console.error("Error creating session:", error);
       toast.error("Error creando la sesión. Por favor, prueba de nuevo.");
     } finally {
       setIsSubmitting(false);
-      router.push("/sessions");
     }
   };
 
@@ -145,32 +146,22 @@ export default function CreateSessionModal() {
   }, [files]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Crear Sesi&oacute;n</Button>
-      </DialogTrigger>
-      <DialogContent className="w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl h-[55vh] sm:h-[55vh] md:h-[55vh] lg:h-[55vh] overflow-y-auto">
-        <DialogHeader className="p-2 h-auto">
-          <DialogTitle className="text-lg">
-            Crear nueva sesi&oacute;n
-          </DialogTitle>
-          <DialogDescription className="text-sm mt-1">
-            A&ntilde;ade detalles sobre la sesi&oacute;n de surf. Haz click en
-            siguiente para continuar con el siguiente paso.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="container mx-auto py-8 flex justify-center min-h-screen">
+      <div className="w-full max-w-5xl">
+        <h1 className="text-2xl font-bold mb-6">Crear nueva sesión</h1>
         <Form {...form}>
-          <form className="space-y-4 h-full flex flex-col">
+          <form className="space-y-8 p-6">
             {step === 1 && (
-              <div className="space-y-4 flex-grow overflow-y-auto">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>T&iacute;tulo</FormLabel>
+                      <FormLabel>Título</FormLabel>
                       <FormControl>
                         <Input
+                          className="max-w-xl bg-white"
                           placeholder="Introduce el título de la sesión"
                           {...field}
                         />
@@ -191,12 +182,12 @@ export default function CreateSessionModal() {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-full sm:w-[240px] pl-3 text-left font-normal",
+                                "w-[240px] pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "yyyy-MM-dd")
+                                format(field.value, "PPP")
                               ) : (
                                 <span>Selecciona una fecha</span>
                               )}
@@ -227,7 +218,11 @@ export default function CreateSessionModal() {
                     <FormItem>
                       <FormLabel>Hora</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input
+                          className="max-w-28 bg-white"
+                          type="time"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -236,31 +231,41 @@ export default function CreateSessionModal() {
               </div>
             )}
             {step === 2 && (
-              <div className="flex flex-col h-full space-y-4">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ubicaci&oacute;n</FormLabel>
+                      <FormLabel>Ubicación</FormLabel>
                       <FormControl>
                         <LocationSearch
                           {...field}
-                          setLatitude={(lat) => form.setValue("latitude", lat)}
-                          setLongitude={(lng) =>
-                            form.setValue("longitude", lng)
-                          }
+                          setLatitude={(lat) => {
+                            form.setValue("latitude", lat);
+                            form.setValue(
+                              "location",
+                              `${lat}, ${form.getValues("longitude")}`
+                            );
+                          }}
+                          setLongitude={(lng) => {
+                            form.setValue("longitude", lng);
+                            form.setValue(
+                              "location",
+                              `${form.getValues("latitude")}, ${lng}`
+                            );
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="flex-grow w-full">
+                <div className="h-[50vh] w-full">
                   <MapContainer
                     center={[37.8, -122.4]}
                     zoom={14}
-                    className="w-full h-[400px]"
+                    className="h-full w-full"
                   >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <Marker
@@ -270,8 +275,20 @@ export default function CreateSessionModal() {
                       ]}
                     />
                     <LocationMarker
-                      setLatitude={(lat) => form.setValue("latitude", lat)}
-                      setLongitude={(lng) => form.setValue("longitude", lng)}
+                      setLatitude={(lat) => {
+                        form.setValue("latitude", lat);
+                        form.setValue(
+                          "location",
+                          `${lat}, ${form.getValues("longitude")}`
+                        );
+                      }}
+                      setLongitude={(lng) => {
+                        form.setValue("longitude", lng);
+                        form.setValue(
+                          "location",
+                          `${form.getValues("latitude")}, ${lng}`
+                        );
+                      }}
                       latitude={form.watch("latitude")}
                       longitude={form.watch("longitude")}
                     />
@@ -280,7 +297,7 @@ export default function CreateSessionModal() {
               </div>
             )}
             {step === 3 && (
-              <div className="space-y-4 flex-grow overflow-y-auto">
+              <div className="space-y-4">
                 <div className="grid w-full max-w-sm items-center gap-1.5">
                   <Label htmlFor="media">Multimedia</Label>
                   <Input
@@ -299,7 +316,7 @@ export default function CreateSessionModal() {
                           <Image
                             src={fileWithPreview.preview}
                             alt={`Preview ${index + 1}`}
-                            className="w-full h-full object-cover rounded"
+                            className="object-cover rounded"
                             fill
                           />
                         ) : (
@@ -313,14 +330,14 @@ export default function CreateSessionModal() {
                 )}
               </div>
             )}
-            <DialogFooter className="mt-auto pt-4">
+            <div className="flex justify-between mt-8">
               {step > 1 && (
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                   onClick={() => setStep(step - 1)}
                 >
-                  Atr&aacute;s
+                  Atrás
                 </Button>
               )}
               {step < 3 ? (
@@ -336,10 +353,10 @@ export default function CreateSessionModal() {
                   {isSubmitting ? "Creando..." : "Crear Sesión"}
                 </Button>
               )}
-            </DialogFooter>
+            </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

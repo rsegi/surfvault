@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "db";
-import { insertSession } from "db/session/session";
-import { saveFileInBucket } from "s3/s3Service";
+import { insertSession } from "api/session/session";
+import { saveFileInBucket } from "api/s3/s3Service";
 
 export const createSession = async (formData: FormData) => {
   const userId = formData.get("userId") as string;
@@ -39,20 +39,6 @@ export const createSession = async (formData: FormData) => {
         filePromises.push(savePromise);
       }
     }
-
-    // for (let index = 0; index < files.length; index++) {
-    //   const file = files[index];
-
-    //   const fileBuffer = await file.arrayBuffer();
-    //   try {
-    //     await saveFileInBucket(
-    //       `${createdSession.createdSession}/${index}`,
-    //       Buffer.from(fileBuffer)
-    //     );
-    //   } catch {
-    //     tx.rollback();
-    //   }
-    // }
 
     try {
       await Promise.all(filePromises);

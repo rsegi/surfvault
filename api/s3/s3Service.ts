@@ -1,3 +1,4 @@
+import { FileUrl } from "api/session/session";
 import * as Minio from "minio";
 import internal from "stream";
 
@@ -52,6 +53,41 @@ export const getFileFromBucket = async (fileName: string) => {
   return await s3Client.getObject(BUCKET_NAME, fileName);
 };
 
+export const getFilesFromBucketByPrefix = async (prefix: string) => {
+  try {
+    const filesUrls: FileUrl[] = [];
+
+    console.log("Prefix", prefix);
+    const stream = s3Client.listObjectsV2(BUCKET_NAME, prefix);
+    console.log("Stream", stream);
+
+    for await (const obj of stream) {
+      if (!obj.name) {
+        console.log("Skipping prefix entry:", obj);
+        continue;
+      }
+      const objectName = obj.name;
+      console.log("Object", obj);
+
+      try {
+        const presignedUrl = await createPresignedUrlToDownload(objectName);
+
+        filesUrls.push({
+          name: objectName,
+          url: presignedUrl,
+        });
+      } catch (err) {
+        console.error(`Error fetching content for ${objectName}:`, err);
+      }
+    }
+
+    return filesUrls;
+  } catch (error) {
+    console.error("Error fetching files from bucket:", error);
+    return null;
+  }
+};
+
 export const deleteFileFromBucket = async (fileName: string) => {
   try {
     await s3Client.removeObject(BUCKET_NAME, fileName);
@@ -76,6 +112,6 @@ export const createPresignedUrlToDownload = async (
   fileName: string,
   expiry?: number
 ) => {
-  expiry = expiry ? expiry : 60 * 60; // 1 hour
+  expiry = expiry ? expiry : 24 * 60 * 60; // 1 day
   return await s3Client.presignedGetObject(BUCKET_NAME, fileName, expiry);
 };

@@ -12,6 +12,7 @@ import {
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import type { AdapterAccountType } from "next-auth/adapters";
+import { relations } from "drizzle-orm";
 
 const connectionString = "postgres://postgres:postgres@localhost:5432/drizzle";
 const pool = postgres(connectionString, { max: 1 });
@@ -29,6 +30,11 @@ export const users = pgTable("user", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+}));
+
 export const accounts = pgTable(
   "account",
   {
@@ -66,6 +72,14 @@ export const sessions = pgTable("session", {
   date: date("date").notNull(),
 });
 
+export const sessionsRelations = relations(sessions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+  surfConditions: many(surfConditions),
+}));
+
 export const surfConditions = pgTable("surfCondition", {
   id: text("id")
     .primaryKey()
@@ -74,13 +88,20 @@ export const surfConditions = pgTable("surfCondition", {
     .notNull()
     .references(() => sessions.id, { onDelete: "cascade" }),
   dateTime: time("time").notNull(),
-  waveHeight: real("waveHeight"),
-  waveDirection: integer("waveDirection"),
-  wavePeriod: integer("wavePeriod"),
-  windSpeed: real("windSpeed"),
-  windDirection: integer("windDirection"),
-  windGusts: real("windGusts"),
-  temperature: integer("temperature"),
-  waterTemperature: integer("waterTemperature"),
-  weatherCode: integer("weatherCode"),
+  waveHeight: real("waveHeight").notNull(),
+  waveDirection: integer("waveDirection").notNull(),
+  wavePeriod: integer("wavePeriod").notNull(),
+  windSpeed: real("windSpeed").notNull(),
+  windDirection: integer("windDirection").notNull(),
+  windGusts: real("windGusts").notNull(),
+  temperature: integer("temperature").notNull(),
+  waterTemperature: integer("waterTemperature").notNull(),
+  weatherCode: integer("weatherCode").notNull(),
 });
+
+export const surfConditionsRelations = relations(surfConditions, ({ one }) => ({
+  session: one(sessions, {
+    fields: [surfConditions.sessionId],
+    references: [sessions.id],
+  }),
+}));

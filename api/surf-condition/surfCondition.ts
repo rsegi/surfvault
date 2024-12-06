@@ -6,7 +6,7 @@ import { surfConditions } from "db/schema";
 import { ExtractTablesWithRelations } from "drizzle-orm";
 import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { PgTransaction } from "drizzle-orm/pg-core";
-import * as schema from "../schema";
+import * as schema from "../../db/schema";
 
 export const createSurfConditions = async (
   tx: PgTransaction<

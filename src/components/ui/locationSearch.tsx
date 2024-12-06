@@ -78,14 +78,17 @@ export default function LocationSearch({
           onClick={() => setOpen(true)}
           onBlur={onBlur}
         >
-          {value || "Search for a location..."}
+          {value || "Busca una ubicación"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        style={{ zIndex: 9999 }}
+      >
         <div className="flex flex-col space-y-2 p-2 w-full">
           <Input
-            placeholder="Search for a location..."
+            placeholder="Busca una ubicación"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
