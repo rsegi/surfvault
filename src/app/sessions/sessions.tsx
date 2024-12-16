@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -9,20 +8,30 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
-import { format, isValid, parse } from "date-fns";
-import { Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar, Waves, Wind, Droplet, History } from "lucide-react";
 import Image from "next/image";
 import { SessionResponse } from "api/session/session";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+import { WeatherCode } from "@/utils/weatherCode";
+import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
+import { Separator } from "@/components/ui/separator";
+import { roundTimeToHour } from "@/utils/timeUtils";
+
+const MapWithNoSSR = dynamic(() => import("@/components/mapFixed"), {
+  ssr: false,
+});
+
+function InfoItem({ icon, value }: { icon: React.ReactNode; value: string }) {
+  return (
+    <div className="flex items-center h-full px-2">
+      <div className="mr-2">{icon}</div>
+      <div className="text-sm font-medium flex-grow">{value}</div>
+    </div>
+  );
+}
 
 export default function SessionsPage({
   sessions,
@@ -34,17 +43,6 @@ export default function SessionsPage({
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const chartConfig = {
-    waveHeight: {
-      label: "Wave Height (m)",
-      color: "hsl(var(--chart-1))",
-    },
-    windSpeed: {
-      label: "Wind Speed (m/s)",
-      color: "hsl(var(--chart-2))",
-    },
-  };
 
   if (sessions.length === 0) {
     return (
@@ -67,86 +65,108 @@ export default function SessionsPage({
       <Link href="/sessions/create">
         <Button>Crear Nueva Sesión</Button>
       </Link>
-      {sessions.map((session) => (
-        <Link
-          key={session.id}
-          href={`/sessions/${session.id}`}
-          className="block"
-        >
-          <Card key={session.id} className="w-full max-w-3xl mx-auto">
-            <CardHeader>
-              <CardTitle>{session.title}</CardTitle>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span>{format(new Date(session.date), "dd/MM/yyyy")}</span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {session.fileUrls && session.fileUrls.length > 0 && (
-                <Carousel className="w-full max-w-xs mx-auto">
-                  <CarouselContent>
-                    {session.fileUrls.map((url, index) => (
-                      <CarouselItem key={index}>
-                        <Image
-                          src={url.url}
-                          alt={`Session photo ${index + 1}`}
-                          width={200}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-md"
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
-              )}
-              {isClient && (
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={session.surfConditions}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="dateTime"
-                        tickFormatter={(value) => {
-                          const cleanedValue = value.trim();
-
-                          const parsedTime = parse(
-                            cleanedValue,
-                            "HH:mm:ss",
-                            new Date()
-                          );
-                          if (isValid(parsedTime)) {
-                            return format(parsedTime, "HH:mm");
-                          }
-
-                          return cleanedValue;
-                        }}
-                      />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="waveHeight"
-                        stroke={chartConfig.waveHeight.color}
-                        name={chartConfig.waveHeight.label}
-                      />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="windSpeed"
-                        stroke={chartConfig.windSpeed.color}
-                        name={chartConfig.windSpeed.label}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+      {sessions.map((session) => {
+        const submittedCondition = session.surfConditions.find(
+          (sc) => sc.dateTime === roundTimeToHour(session.time)
+        );
+        return (
+          <Link
+            key={session.id}
+            href={`/sessions/${session.id}`}
+            className="block"
+          >
+            <div className="w-full max-w-3xl mx-auto bg-gray-100 p-4 rounded-lg shadow-md">
+              <div className="flex bg-white rounded-md overflow-hidden">
+                <div className="w-full relative h-80">
+                  {session.fileUrls && session.fileUrls.length > 0 ? (
+                    <Carousel className="w-full h-full">
+                      <CarouselContent>
+                        {session.fileUrls.map((file, index) => (
+                          <CarouselItem key={index} className="h-full">
+                            <Image
+                              src={file.url}
+                              alt={`${file.name}`}
+                              fill={true}
+                              className="rounded-md w-auto h-auto object-contain"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <div className="absolute top-1/2 left-14 right-14 flex justify-between transform -translate-y-1/2 z-10">
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </div>
+                    </Carousel>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No image</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
+                <div className="w-24 flex flex-col justify-between">
+                  <InfoItem
+                    icon={<Waves className="w-4 h-4" />}
+                    value={`${submittedCondition!.waveHeight}m`}
+                  />
+                  <Separator />
+                  <InfoItem
+                    icon={<History className="w-4 h-4" />}
+                    value={`${submittedCondition!.wavePeriod}s`}
+                  />
+                  <Separator />
+                  <InfoItem
+                    icon={<Wind className="w-4 h-4" />}
+                    value={`${getDirectionFromDegrees(submittedCondition!.windDirection)}`}
+                  />
+                  <Separator />
+                  <InfoItem
+                    icon={
+                      <Image
+                        src={
+                          WeatherCode[submittedCondition!.weatherCode].image ||
+                          "/placeholder.svg"
+                        }
+                        width={16}
+                        height={16}
+                        alt="Clima"
+                      />
+                    }
+                    value={`${submittedCondition!.temperature}°C`}
+                  />
+                  <Separator />
+                  <InfoItem
+                    icon={<Droplet className="w-4 h-4" />}
+                    value={`${submittedCondition!.waterTemperature}°C`}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-4 px-2">
+                <div>
+                  <div className="flex items-center space-x-2 text-base font-semibold">
+                    {session.title}
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>{format(new Date(session.date), "dd/MM/yyyy")}</span>
+                  </div>
+                </div>
+                {isClient && (
+                  <div className="w-48 h-24">
+                    <MapWithNoSSR
+                      center={[
+                        parseFloat(session.latitude),
+                        parseFloat(session.longitude),
+                      ]}
+                      zoom={10}
+                      className="h-full w-full rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }

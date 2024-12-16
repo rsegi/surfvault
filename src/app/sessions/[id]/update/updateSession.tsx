@@ -107,9 +107,7 @@ export default function UpdateSessionPage({
       formData.append("time", values.time);
       formData.append("previousLatitude", session.latitude);
       formData.append("previousLongitude", session.longitude);
-      formData.append("previousDate", session.date);
-
-      console.log(`formData: ${formData}`);
+      formData.append("previousDate", `${session.date}`);
 
       const result = await updateSession(formData);
 

@@ -65,7 +65,6 @@ export const getFilesFromBucketByPrefix = async (prefix: string) => {
     for (const file of files) {
       try {
         const metadata = await s3Client.statObject(BUCKET_NAME, file.name);
-        console.log(`metadata: ${JSON.stringify(metadata.metaData)}`);
         const presignedUrl = await createPresignedUrlToDownload(file.name);
 
         filesUrls.push({

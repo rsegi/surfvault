@@ -12,6 +12,10 @@ import {
   Pencil,
   Trash2,
   MousePointer2,
+  History,
+  Waves,
+  Signpost,
+  ChevronsUp,
 } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,7 +104,7 @@ export default function SessionDetailPage({
   };
 
   const getSessionDate = () => {
-    return format(session.date, "dd-MM-yyyy");
+    return format(session.date, "dd/MM/yyyy");
   };
 
   return (
@@ -231,6 +235,40 @@ export default function SessionDetailPage({
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <WeatherInfoCard
+                icon={<Waves className="w-8 h-8" />}
+                label="Altura del oleaje"
+                value={`${selectedCondition.waveHeight}m`}
+              />
+              <WeatherInfoCard
+                icon={<History className="w-8 h-8" />}
+                label="Período del oleaje"
+                value={`${selectedCondition.wavePeriod}s`}
+              />
+              <WeatherInfoCard
+                icon={<Compass className="w-8 h-8" />}
+                label="Dirección del oleaje"
+                value={`${getDirectionFromDegrees(selectedCondition.waveDirection)}`}
+                tooltip={`${selectedCondition.waveDirection}°`}
+                degrees={selectedCondition.waveDirection}
+              />
+              <WeatherInfoCard
+                icon={<Signpost className="w-8 h-8" />}
+                label="Dirección del viento"
+                value={`${getDirectionFromDegrees(selectedCondition.windDirection)}`}
+                tooltip={`${selectedCondition.windDirection}°`}
+                degrees={selectedCondition.windDirection}
+              />
+              <WeatherInfoCard
+                icon={<Wind className="w-8 h-8" />}
+                label="Velocidad del viento"
+                value={`${selectedCondition.windSpeed}km/h`}
+              />
+              <WeatherInfoCard
+                icon={<ChevronsUp className="w-8 h-8" />}
+                label="Ráfagas de viento"
+                value={`${selectedCondition.windGusts} km/h`}
+              />
+              <WeatherInfoCard
                 icon={<Thermometer className="w-8 h-8" />}
                 label="Temperatura"
                 value={`${selectedCondition.temperature}°C`}
@@ -239,25 +277,6 @@ export default function SessionDetailPage({
                 icon={<Droplet className="w-8 h-8" />}
                 label="Temperatura del agua"
                 value={`${selectedCondition.waterTemperature}°C`}
-              />
-              <WeatherInfoCard
-                icon={<Wind className="w-8 h-8" />}
-                label="Dirección del viento"
-                value={`${getDirectionFromDegrees(selectedCondition.windDirection)}`}
-                tooltip={`${selectedCondition.windDirection}°`}
-                degrees={selectedCondition.windDirection}
-              />
-              <WeatherInfoCard
-                icon={<Wind className="w-8 h-8" />}
-                label="Ráfagas de viento"
-                value={`${selectedCondition.windGusts} km/h`}
-              />
-              <WeatherInfoCard
-                icon={<Compass className="w-8 h-8" />}
-                label="Dirección del oleaje"
-                value={`${getDirectionFromDegrees(selectedCondition.waveDirection)}`}
-                tooltip={`${selectedCondition.waveDirection}°`}
-                degrees={selectedCondition.waveDirection}
               />
               <WeatherInfoCard
                 icon={
@@ -308,7 +327,7 @@ function WeatherInfoCard({
             {degrees !== undefined && (
               <div className="relative w-6 h-6" title={tooltip}>
                 <MousePointer2
-                  className="w-6 h-6 absolute top-0 left-0 text-primary"
+                  className="w-5 h-5 absolute top-0 left-0 text-primary"
                   style={{ transform: `rotate(${45 + degrees}deg)` }}
                 />
               </div>
