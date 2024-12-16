@@ -19,6 +19,7 @@ import { WeatherCode } from "@/utils/weatherCode";
 import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
 import { Separator } from "@/components/ui/separator";
 import { roundTimeToHour } from "@/utils/timeUtils";
+import { Card, CardContent } from "@/components/ui/card";
 
 const MapWithNoSSR = dynamic(() => import("@/components/mapFixed"), {
   ssr: false,
@@ -61,7 +62,7 @@ export default function SessionsPage({
   }
 
   return (
-    <div className="space-y-8 py-8">
+    <div className="flex space-y-8 py-8 flex-col items-center justify-center">
       <Link href="/sessions/create">
         <Button>Crear Nueva Sesión</Button>
       </Link>
@@ -70,25 +71,23 @@ export default function SessionsPage({
           (sc) => sc.dateTime === roundTimeToHour(session.time)
         );
         return (
-          <Link
-            key={session.id}
-            href={`/sessions/${session.id}`}
-            className="block"
-          >
-            <div className="w-full max-w-3xl mx-auto bg-gray-100 p-4 rounded-lg shadow-md">
+          <Card className="w-full max-w-[992px]" key={session.id}>
+            <CardContent className="space-y-8">
               <div className="flex bg-white rounded-md overflow-hidden">
-                <div className="w-full relative h-80">
+                <div className="w-full relative h-96">
                   {session.fileUrls && session.fileUrls.length > 0 ? (
                     <Carousel className="w-full h-full">
-                      <CarouselContent>
+                      <CarouselContent className="my-2">
                         {session.fileUrls.map((file, index) => (
-                          <CarouselItem key={index} className="h-full">
-                            <Image
-                              src={file.url}
-                              alt={`${file.name}`}
-                              fill={true}
-                              className="rounded-md w-auto h-auto object-contain"
-                            />
+                          <CarouselItem key={index} className="h-full w-full">
+                            <div className="h-96 w-full">
+                              <Image
+                                src={file.url}
+                                alt={`${file.name}`}
+                                fill={true}
+                                className="rounded-md w-auto h-auto object-contain"
+                              />
+                            </div>
                           </CarouselItem>
                         ))}
                       </CarouselContent>
@@ -140,31 +139,39 @@ export default function SessionsPage({
                   />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-4 px-2">
-                <div>
-                  <div className="flex items-center space-x-2 text-base font-semibold">
-                    {session.title}
+              <Link
+                key={session.id}
+                href={`/sessions/${session.id}`}
+                className="block"
+              >
+                <div className="flex items-center justify-between mt-4 px-2">
+                  <div>
+                    <div className="flex items-center space-x-2 text-base font-semibold">
+                      {session.title}
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {format(new Date(session.date), "dd/MM/yyyy")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>{format(new Date(session.date), "dd/MM/yyyy")}</span>
-                  </div>
+                  {isClient && (
+                    <div className="w-48 h-24">
+                      <MapWithNoSSR
+                        center={[
+                          parseFloat(session.latitude),
+                          parseFloat(session.longitude),
+                        ]}
+                        zoom={10}
+                        className="h-full w-full rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
-                {isClient && (
-                  <div className="w-48 h-24">
-                    <MapWithNoSSR
-                      center={[
-                        parseFloat(session.latitude),
-                        parseFloat(session.longitude),
-                      ]}
-                      zoom={10}
-                      className="h-full w-full rounded-md"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </Link>
+              </Link>
+            </CardContent>
+          </Card>
         );
       })}
     </div>
