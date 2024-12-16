@@ -14,7 +14,7 @@ export const WeatherCode: { [code: number]: WeatherDescription } = {
   },
   2: {
     description: "Parcialmente Nublado",
-    image: "/weather/pasrtly-cloudy-day.svg",
+    image: "/weather/partly-cloudy-day.svg",
   },
   3: {
     description: "Nublado",

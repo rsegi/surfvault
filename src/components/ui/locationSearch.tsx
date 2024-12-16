@@ -56,7 +56,6 @@ export default function LocationSearch({
 
   const fetchLocations = async (input: string) => {
     const response = await getLocationByText(input);
-    console.log("Response:", response);
     setFilteredLocations(response);
   };
 

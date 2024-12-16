@@ -17,18 +17,17 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { ChartTooltipContent, Tooltip } from "@/components/ui/chart";
 import { format, isValid, parse } from "date-fns";
 import { Calendar } from "lucide-react";
 import Image from "next/image";
-import { SessionByUser } from "api/session/session";
+import { SessionResponse } from "api/session/session";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function SessionsPage({
   sessions,
 }: {
-  sessions: SessionByUser[];
+  sessions: SessionResponse[];
 }) {
   const [isClient, setIsClient] = useState(false);
 
@@ -36,7 +35,6 @@ export default function SessionsPage({
     setIsClient(true);
   }, []);
 
-  console.log("Sessions: ", sessions);
   const chartConfig = {
     waveHeight: {
       label: "Wave Height (m)",
@@ -70,81 +68,84 @@ export default function SessionsPage({
         <Button>Crear Nueva Sesión</Button>
       </Link>
       {sessions.map((session) => (
-        <Card key={session.id} className="w-full max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle>{session.title}</CardTitle>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Calendar className="w-4 h-4" />
-              <span>{format(new Date(session.date), "dd/MM/yyyy")}</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {session.fileUrls && session.fileUrls.length > 0 && (
-              <Carousel className="w-full max-w-xs mx-auto">
-                <CarouselContent>
-                  {session.fileUrls.map((url, index) => (
-                    <CarouselItem key={index}>
-                      <Image
-                        src={url.url}
-                        alt={`Session photo ${index + 1}`}
-                        width={200}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-md"
-                      />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            )}
-            {isClient && (
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={session.surfConditions}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="dateTime"
-                      tickFormatter={(value) => {
-                        const cleanedValue = value.trim();
-
-                        const parsedTime = parse(
-                          cleanedValue,
-                          "HH:mm:ss",
-                          new Date()
-                        );
-                        if (isValid(parsedTime)) {
-                          return format(parsedTime, "HH:mm");
-                        }
-
-                        return cleanedValue;
-                      }}
-                    />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip
-                      content={<ChartTooltipContent config={chartConfig} />}
-                    />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="waveHeight"
-                      stroke={chartConfig.waveHeight.color}
-                      name={chartConfig.waveHeight.label}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="windSpeed"
-                      stroke={chartConfig.windSpeed.color}
-                      name={chartConfig.windSpeed.label}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+        <Link
+          key={session.id}
+          href={`/sessions/${session.id}`}
+          className="block"
+        >
+          <Card key={session.id} className="w-full max-w-3xl mx-auto">
+            <CardHeader>
+              <CardTitle>{session.title}</CardTitle>
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <Calendar className="w-4 h-4" />
+                <span>{format(new Date(session.date), "dd/MM/yyyy")}</span>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {session.fileUrls && session.fileUrls.length > 0 && (
+                <Carousel className="w-full max-w-xs mx-auto">
+                  <CarouselContent>
+                    {session.fileUrls.map((url, index) => (
+                      <CarouselItem key={index}>
+                        <Image
+                          src={url.url}
+                          alt={`Session photo ${index + 1}`}
+                          width={200}
+                          height={200}
+                          className="w-full h-48 object-cover rounded-md"
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              )}
+              {isClient && (
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={session.surfConditions}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="dateTime"
+                        tickFormatter={(value) => {
+                          const cleanedValue = value.trim();
+
+                          const parsedTime = parse(
+                            cleanedValue,
+                            "HH:mm:ss",
+                            new Date()
+                          );
+                          if (isValid(parsedTime)) {
+                            return format(parsedTime, "HH:mm");
+                          }
+
+                          return cleanedValue;
+                        }}
+                      />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="waveHeight"
+                        stroke={chartConfig.waveHeight.color}
+                        name={chartConfig.waveHeight.label}
+                      />
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="windSpeed"
+                        stroke={chartConfig.windSpeed.color}
+                        name={chartConfig.windSpeed.label}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );

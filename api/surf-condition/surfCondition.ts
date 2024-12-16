@@ -3,7 +3,7 @@ import {
   getMarineDataFromLocationAndDate,
 } from "api/open-meteo/openMeteo";
 import { surfConditions } from "db/schema";
-import { ExtractTablesWithRelations } from "drizzle-orm";
+import { and, eq, ExtractTablesWithRelations } from "drizzle-orm";
 import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import * as schema from "../../db/schema";
@@ -39,6 +39,44 @@ export const createSurfConditions = async (
 
   try {
     await tx.insert(surfConditions).values(surfConditionsWithSession);
+  } catch (e) {
+    console.error("Error creating session:", e);
+  }
+};
+
+export const updateSurfConditionsBySessionId = async (
+  tx: PgTransaction<
+    NodePgQueryResultHKT,
+    typeof schema,
+    ExtractTablesWithRelations<typeof schema>
+  >,
+  sessionId: string,
+  latitude: string,
+  longitude: string,
+  date: string
+) => {
+  try {
+    const generatedSurfConditions = await generateSurfConditions(
+      latitude,
+      longitude,
+      date
+    );
+
+    if (generatedSurfConditions.length !== 24) {
+      console.error("Surf conditions weren't generated for a full day.");
+      return;
+    }
+    generatedSurfConditions.forEach(async (sc) => {
+      await tx
+        .update(surfConditions)
+        .set({ ...sc })
+        .where(
+          and(
+            eq(surfConditions.sessionId, sessionId),
+            eq(surfConditions.dateTime, sc.dateTime)
+          )
+        );
+    });
   } catch (e) {
     console.error("Error creating session:", e);
   }
@@ -100,14 +138,4 @@ export type GeneratedSurfCondition = {
 
 export type SurfConditionWithSession = {
   sessionId: string;
-  dateTime: string;
-  waveHeight: number;
-  waveDirection: number;
-  wavePeriod: number;
-  windSpeed: number;
-  windDirection: number;
-  windGusts: number;
-  temperature: number;
-  waterTemperature: number;
-  weatherCode: number;
-};
+} & GeneratedSurfCondition;

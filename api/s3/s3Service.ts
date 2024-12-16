@@ -21,26 +21,14 @@ export const createBucketIfNotExists = async () => {
 
 export const saveFileInBucket = async (
   fileName: string,
-  file: Buffer | internal.Readable
+  file: Buffer | internal.Readable,
+  fileType: string
 ) => {
   await createBucketIfNotExists();
 
-  const fileExists = await checkFileExistsInBucket(fileName);
-
-  if (fileExists) {
-    throw new Error("File already exists");
-  }
-
-  await s3Client.putObject(BUCKET_NAME, fileName, file);
-};
-
-export const checkFileExistsInBucket = async (fileName: string) => {
-  try {
-    await s3Client.statObject(BUCKET_NAME, fileName);
-  } catch {
-    return false;
-  }
-  return true;
+  await s3Client.putObject(BUCKET_NAME, fileName, file, undefined, {
+    "Content-Type": fileType,
+  });
 };
 
 export const getFileFromBucket = async (fileName: string) => {
@@ -53,31 +41,40 @@ export const getFileFromBucket = async (fileName: string) => {
   return await s3Client.getObject(BUCKET_NAME, fileName);
 };
 
+const listFilesFromBucketByPrefix = async (prefix: string) => {
+  const files = [];
+  try {
+    const stream = s3Client.listObjectsV2(BUCKET_NAME, prefix);
+    for await (const obj of stream) {
+      if (obj.name) {
+        files.push({ name: obj.name });
+      }
+    }
+  } catch (error) {
+    console.error("Error listing files from bucket:", error);
+    throw error;
+  }
+  return files;
+};
+
 export const getFilesFromBucketByPrefix = async (prefix: string) => {
   try {
     const filesUrls: FileUrl[] = [];
+    const files = await listFilesFromBucketByPrefix(prefix);
 
-    console.log("Prefix", prefix);
-    const stream = s3Client.listObjectsV2(BUCKET_NAME, prefix);
-    console.log("Stream", stream);
-
-    for await (const obj of stream) {
-      if (!obj.name) {
-        console.log("Skipping prefix entry:", obj);
-        continue;
-      }
-      const objectName = obj.name;
-      console.log("Object", obj);
-
+    for (const file of files) {
       try {
-        const presignedUrl = await createPresignedUrlToDownload(objectName);
+        const metadata = await s3Client.statObject(BUCKET_NAME, file.name);
+        console.log(`metadata: ${JSON.stringify(metadata.metaData)}`);
+        const presignedUrl = await createPresignedUrlToDownload(file.name);
 
         filesUrls.push({
-          name: objectName,
+          name: file.name,
           url: presignedUrl,
+          type: metadata.metaData["content-type"] ?? "unknown",
         });
       } catch (err) {
-        console.error(`Error fetching content for ${objectName}:`, err);
+        console.error(`Error fetching content for ${file.name}:`, err);
       }
     }
 
@@ -85,6 +82,22 @@ export const getFilesFromBucketByPrefix = async (prefix: string) => {
   } catch (error) {
     console.error("Error fetching files from bucket:", error);
     return null;
+  }
+};
+
+export const deleteFilesFromBucketByPrefix = async (prefix: string) => {
+  try {
+    const files = await listFilesFromBucketByPrefix(prefix);
+
+    for (const file of files) {
+      try {
+        await deleteFileFromBucket(file.name);
+      } catch (err) {
+        console.error(`Error deleting content for ${file.name}:`, err);
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching files from bucket:", error);
   }
 };
 
@@ -102,7 +115,7 @@ export const createPresignedUrlToUpload = async (
   fileName: string,
   expiry?: number
 ) => {
-  expiry = expiry ? expiry : 60 * 60; // 1 hour
+  expiry = expiry ?? 24 * 60 * 60; // 1 day
   await createBucketIfNotExists();
 
   return await s3Client.presignedPutObject(BUCKET_NAME, fileName, expiry);
@@ -112,6 +125,6 @@ export const createPresignedUrlToDownload = async (
   fileName: string,
   expiry?: number
 ) => {
-  expiry = expiry ? expiry : 24 * 60 * 60; // 1 day
+  expiry = expiry ?? 24 * 60 * 60; // 1 day
   return await s3Client.presignedGetObject(BUCKET_NAME, fileName, expiry);
 };

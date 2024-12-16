@@ -13,9 +13,6 @@ export default async function Sessions() {
     redirect("/auth/sign-in");
   }
 
-  const userId = session!.user!.id!;
-  console.log(`UserId: ${userId}`);
-
   const sessions = await getSessionsByUser(session!.user!.id!);
 
   return (

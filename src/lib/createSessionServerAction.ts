@@ -6,10 +6,11 @@ import { saveFileInBucket } from "api/s3/s3Service";
 
 export const createSession = async (formData: FormData) => {
   const userId = formData.get("userId") as string;
-  const latitude = parseFloat(formData.get("latitude") as string);
-  const longitude = parseFloat(formData.get("longitude") as string);
+  const latitude = formData.get("latitude") as string;
+  const longitude = formData.get("longitude") as string;
   const title = formData.get("title") as string;
   const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
   const createdSession = await db.transaction(async (tx) => {
     const createdSession = await insertSession(
       tx,
@@ -17,7 +18,8 @@ export const createSession = async (formData: FormData) => {
       latitude,
       longitude,
       title,
-      date
+      date,
+      time
     );
 
     if (!createdSession) {
@@ -28,10 +30,14 @@ export const createSession = async (formData: FormData) => {
     for (const [key, value] of formData.entries()) {
       if (key.startsWith("file") && value instanceof File) {
         const file = value;
+        const fileKey = key.replace("file", "fileType");
+        const fileType = formData.get(fileKey) as string;
+
         const fileBuffer = await file.arrayBuffer();
         const savePromise = saveFileInBucket(
           `${createdSession.createdSession}/${key}`,
-          Buffer.from(fileBuffer)
+          Buffer.from(fileBuffer),
+          fileType
         ).catch((error) => {
           console.error(`Failed to save file ${key}:`, error);
           throw error;
@@ -44,7 +50,7 @@ export const createSession = async (formData: FormData) => {
       await Promise.all(filePromises);
     } catch (error) {
       console.error("Error saving files:", error);
-      await tx.rollback();
+      tx.rollback();
       throw new Error("Failed to save files");
     }
 

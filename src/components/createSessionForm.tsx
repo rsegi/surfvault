@@ -145,201 +145,211 @@ export default function CreateSessionModal() {
   }, [files]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Crear Sesi&oacute;n</Button>
-      </DialogTrigger>
-      <DialogContent className="w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl h-[55vh] sm:h-[55vh] md:h-[55vh] lg:h-[55vh] overflow-y-auto">
-        <DialogHeader className="p-2 h-auto">
-          <DialogTitle className="text-lg">
-            Crear nueva sesi&oacute;n
-          </DialogTitle>
-          <DialogDescription className="text-sm mt-1">
-            A&ntilde;ade detalles sobre la sesi&oacute;n de surf. Haz click en
-            siguiente para continuar con el siguiente paso.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form className="space-y-4 h-full flex flex-col">
-            {step === 1 && (
-              <div className="space-y-4 flex-grow overflow-y-auto">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>T&iacute;tulo</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Introduce el título de la sesión"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Fecha</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full sm:w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "yyyy-MM-dd")
-                              ) : (
-                                <span>Selecciona una fecha</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
+    <div className="overflow-visible">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Crear Sesi&oacute;n</Button>
+        </DialogTrigger>
+        <DialogContent className="w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl h-[55vh] sm:h-[55vh] md:h-[55vh] lg:h-[55vh] overflow-y-auto">
+          <DialogHeader className="p-2 h-auto">
+            <DialogTitle className="text-lg">
+              Crear nueva sesi&oacute;n
+            </DialogTitle>
+            <DialogDescription className="text-sm mt-1">
+              A&ntilde;ade detalles sobre la sesi&oacute;n de surf. Haz click en
+              siguiente para continuar con el siguiente paso.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form className="space-y-4 h-full flex flex-col">
+              {step === 1 && (
+                <div className="space-y-4 flex-grow overflow-y-auto">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>T&iacute;tulo</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Introduce el título de la sesión"
+                            {...field}
                           />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hora</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-            {step === 2 && (
-              <div className="flex flex-col h-full space-y-4">
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ubicaci&oacute;n</FormLabel>
-                      <FormControl>
-                        <LocationSearch
-                          {...field}
-                          setLatitude={(lat) => form.setValue("latitude", lat)}
-                          setLongitude={(lng) =>
-                            form.setValue("longitude", lng)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex-grow w-full">
-                  <MapContainer
-                    center={[37.8, -122.4]}
-                    zoom={14}
-                    className="w-full h-[400px]"
-                  >
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Marker
-                      position={[
-                        form.watch("latitude"),
-                        form.watch("longitude"),
-                      ]}
-                    />
-                    <LocationMarker
-                      setLatitude={(lat) => form.setValue("latitude", lat)}
-                      setLongitude={(lng) => form.setValue("longitude", lng)}
-                      latitude={form.watch("latitude")}
-                      longitude={form.watch("longitude")}
-                    />
-                  </MapContainer>
-                </div>
-              </div>
-            )}
-            {step === 3 && (
-              <div className="space-y-4 flex-grow overflow-y-auto">
-                <div className="grid w-full max-w-sm items-center gap-1.5">
-                  <Label htmlFor="media">Multimedia</Label>
-                  <Input
-                    id="media"
-                    type="file"
-                    multiple
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Fecha</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-[240px] pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-auto p-0"
+                            align="start"
+                            side="bottom"
+                            style={{ zIndex: 9999 }}
+                          >
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date > new Date() ||
+                                date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hora</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                {files.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {files.map((fileWithPreview, index) => (
-                      <div key={index} className="relative aspect-video">
-                        {fileWithPreview.fileType === "image" ? (
-                          <Image
-                            src={fileWithPreview.preview}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-full object-cover rounded"
-                            fill
+              )}
+              {step === 2 && (
+                <div className="flex flex-col h-full space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ubicaci&oacute;n</FormLabel>
+                        <FormControl>
+                          <LocationSearch
+                            {...field}
+                            setLatitude={(lat) =>
+                              form.setValue("latitude", lat)
+                            }
+                            setLongitude={(lng) =>
+                              form.setValue("longitude", lng)
+                            }
                           />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                            <Play className="text-gray-500" size={48} />
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex-grow w-full">
+                    <MapContainer
+                      center={[37.8, -122.4]}
+                      zoom={14}
+                      className="w-full h-[400px]"
+                    >
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <Marker
+                        position={[
+                          form.watch("latitude"),
+                          form.watch("longitude"),
+                        ]}
+                      />
+                      <LocationMarker
+                        setLatitude={(lat) => form.setValue("latitude", lat)}
+                        setLongitude={(lng) => form.setValue("longitude", lng)}
+                        latitude={form.watch("latitude")}
+                        longitude={form.watch("longitude")}
+                      />
+                    </MapContainer>
                   </div>
+                </div>
+              )}
+              {step === 3 && (
+                <div className="space-y-4 flex-grow overflow-y-auto">
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor="media">Multimedia</Label>
+                    <Input
+                      id="media"
+                      type="file"
+                      multiple
+                      accept="image/*,video/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                  {files.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {files.map((fileWithPreview, index) => (
+                        <div key={index} className="relative aspect-video">
+                          {fileWithPreview.fileType === "image" ? (
+                            <Image
+                              src={fileWithPreview.preview}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-full object-cover rounded"
+                              fill
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
+                              <Play className="text-gray-500" size={48} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              <DialogFooter className="mt-auto pt-4">
+                {step > 1 && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setStep(step - 1)}
+                  >
+                    Atr&aacute;s
+                  </Button>
                 )}
-              </div>
-            )}
-            <DialogFooter className="mt-auto pt-4">
-              {step > 1 && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setStep(step - 1)}
-                >
-                  Atr&aacute;s
-                </Button>
-              )}
-              {step < 3 ? (
-                <Button type="button" onClick={() => setStep(step + 1)}>
-                  Siguiente
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={form.handleSubmit(onSubmit)}
-                >
-                  {isSubmitting ? "Creando..." : "Crear Sesión"}
-                </Button>
-              )}
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                {step < 3 ? (
+                  <Button type="button" onClick={() => setStep(step + 1)}>
+                    Siguiente
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {isSubmitting ? "Creando..." : "Crear Sesión"}
+                  </Button>
+                )}
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

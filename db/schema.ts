@@ -69,7 +69,8 @@ export const sessions = pgTable("session", {
   latitude: decimal("latitude", { precision: 7, scale: 5 }).notNull(),
   longitude: decimal("longitude", { precision: 8, scale: 5 }).notNull(),
   title: text("title").notNull(),
-  date: date("date").notNull(),
+  date: date("date", { mode: "date" }).notNull(),
+  time: time("time", { precision: 0 }).notNull(),
 });
 
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({

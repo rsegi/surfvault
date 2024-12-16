@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,7 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -27,12 +25,14 @@ import {
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
-import Image from "next/image";
 import LocationSearch from "@/components/ui/locationSearch";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
-import { createSession } from "@/lib/createSessionServerAction";
+import { useRouter } from "next/navigation";
+import { SessionResponse } from "api/session/session";
+import { updateSession } from "@/lib/updateSessionServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { removeSeconds } from "@/utils/timeUtils";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -50,7 +50,7 @@ const LocationMarker = dynamic(() => import("@/components/locationMarker"), {
   ssr: false,
 });
 
-const createSessionSchema = z.object({
+const updateSessionSchema = z.object({
   title: z.string().min(5, {
     message: "El título debe tener al menos 5 carácteres",
   }),
@@ -63,117 +63,77 @@ const createSessionSchema = z.object({
   location: z.string().min(2, {
     message: "La ubicación debe tener al menos 2 carácteres",
   }),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+  latitude: z.string(),
+  longitude: z.string(),
 });
 
-type FileWithPreview = {
-  file: File;
-  preview: string;
-  fileType: string;
-};
-
-export default function CreateSessionPage() {
+export default function UpdateSessionPage({
+  session,
+}: {
+  session: SessionResponse;
+}) {
+  const router = useRouter();
   const user = useCurrentUser();
   const [step, setStep] = useState(1);
-  const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const [fileOrder, setFileOrder] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof createSessionSchema>>({
-    resolver: zodResolver(createSessionSchema),
+  const form = useForm<z.infer<typeof updateSessionSchema>>({
+    resolver: zodResolver(updateSessionSchema),
     defaultValues: {
-      title: "",
-      date: format(new Date(), "yyyy-MM-dd"),
-      time: "",
-      location: "",
-      latitude: 0,
-      longitude: 0,
+      title: session.title,
+      date: format(new Date(session.date), "yyyy-MM-dd"),
+      time: removeSeconds(session.time),
+      latitude: session.latitude,
+      longitude: session.longitude,
+      location: `${session.latitude}, ${session.longitude}`,
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof createSessionSchema>) => {
+  const onSubmit = async (values: z.infer<typeof updateSessionSchema>) => {
     if (!user?.id) {
       console.error("Usuario no autenticado");
-      toast.error("Debes estar autenticado para crear una sesión.");
+      toast.error("Debes estar autenticado para actualizar una sesión.");
       return;
     }
 
-    let sessionId = "";
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("userId", user.id);
-      formData.append("latitude", values.latitude.toString());
-      formData.append("longitude", values.longitude.toString());
+      formData.append("sessionId", session.id);
+      formData.append("latitude", values.latitude);
+      formData.append("longitude", values.longitude);
       formData.append("title", values.title);
       formData.append("date", values.date);
       formData.append("time", values.time);
-      formData.append("location", values.location);
+      formData.append("previousLatitude", session.latitude);
+      formData.append("previousLongitude", session.longitude);
+      formData.append("previousDate", session.date);
 
-      fileOrder.forEach((index, orderIndex) => {
-        formData.append(`file${orderIndex}`, files[index].file);
-        formData.append(`fileType${orderIndex}`, files[index].fileType);
-      });
+      console.log(`formData: ${formData}`);
 
-      const result = await createSession(formData);
+      const result = await updateSession(formData);
 
       if (result.error) {
         throw new Error(result.error);
       }
-      sessionId = result!.createdSession;
-      toast.success("Sesión creada con éxito.");
+
+      toast.success("Sesión editada con éxito.");
     } catch (error) {
-      console.error("Error creating session:", error);
-      toast.error("Error creando la sesión. Por favor, prueba de nuevo.");
+      console.error("Error updating session:", error);
+      toast.error("Error editando la sesión. Por favor, prueba de nuevo.");
     } finally {
       setIsSubmitting(false);
-      window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${sessionId}`;
+      router.push(`/sessions/${session.id}`);
+      // window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${session.id}`;
     }
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files).map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-        fileType: file.type.startsWith("image/") ? "image" : "video",
-      }));
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-      setFileOrder((prevOrder) => [
-        ...prevOrder,
-        ...Array.from(
-          { length: newFiles.length },
-          (_, i) => prevOrder.length + i
-        ),
-      ]);
-    }
-  };
-
-  const removeFile = (indexToRemove: number) => {
-    setFiles((prevFiles) =>
-      prevFiles.filter((_, index) => index !== indexToRemove)
-    );
-    setFileOrder((prevOrder) => {
-      const newOrder = prevOrder.filter(
-        (orderIndex) => orderIndex !== indexToRemove
-      );
-      return newOrder.map((orderIndex) =>
-        orderIndex > indexToRemove ? orderIndex - 1 : orderIndex
-      );
-    });
-  };
-
-  useEffect(() => {
-    return () => files.forEach((file) => URL.revokeObjectURL(file.preview));
-  }, [files]);
 
   return (
     <div className="container mx-auto py-8 flex justify-center">
       <Card className="min-w-[600px] min-h-[400px] flex flex-col">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
-            Crear nueva sesión
+            Actualizar sesión
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-center">
@@ -248,14 +208,14 @@ export default function CreateSessionPage() {
                           <LocationSearch
                             {...field}
                             setLatitude={(lat) => {
-                              form.setValue("latitude", lat);
+                              form.setValue("latitude", lat.toString());
                               form.setValue(
                                 "location",
                                 `${lat}, ${form.getValues("longitude")}`
                               );
                             }}
                             setLongitude={(lng) => {
-                              form.setValue("longitude", lng);
+                              form.setValue("longitude", lng.toString());
                               form.setValue(
                                 "location",
                                 `${form.getValues("latitude")}, ${lng}`
@@ -269,85 +229,40 @@ export default function CreateSessionPage() {
                   />
                   <div className="h-[600px] w-full rounded-md overflow-hidden">
                     <MapContainer
-                      center={[37.8, -122.4]}
+                      center={[
+                        parseFloat(form.getValues("latitude")),
+                        parseFloat(form.getValues("longitude")),
+                      ]}
                       zoom={14}
                       className="h-full w-full"
                     >
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       <Marker
                         position={[
-                          form.watch("latitude"),
-                          form.watch("longitude"),
+                          parseFloat(form.watch("latitude")),
+                          parseFloat(form.watch("longitude")),
                         ]}
                       />
                       <LocationMarker
                         setLatitude={(lat) => {
-                          form.setValue("latitude", lat);
+                          form.setValue("latitude", lat.toString());
                           form.setValue(
                             "location",
                             `${lat}, ${form.getValues("longitude")}`
                           );
                         }}
                         setLongitude={(lng) => {
-                          form.setValue("longitude", lng);
+                          form.setValue("longitude", lng.toString());
                           form.setValue(
                             "location",
                             `${form.getValues("latitude")}, ${lng}`
                           );
                         }}
-                        latitude={form.watch("latitude")}
-                        longitude={form.watch("longitude")}
+                        latitude={parseFloat(form.watch("latitude"))}
+                        longitude={parseFloat(form.watch("longitude"))}
                       />
                     </MapContainer>
                   </div>
-                </div>
-              )}
-              {step === 3 && (
-                <div className="space-y-4 flex flex-col items-center justify-center h-full">
-                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="media">Multimedia</Label>
-                    <Input
-                      id="media"
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      onChange={handleFileChange}
-                    />
-                  </div>
-                  {files.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-2xl">
-                      {fileOrder.map((orderIndex) => {
-                        const fileWithPreview = files[orderIndex];
-                        return (
-                          <div
-                            key={orderIndex}
-                            className="relative aspect-video rounded-md overflow-hidden group"
-                          >
-                            {fileWithPreview.fileType === "image" ? (
-                              <Image
-                                src={fileWithPreview.preview}
-                                alt={`Preview ${orderIndex + 1}`}
-                                className="object-cover"
-                                fill
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                                <Play className="text-gray-500" size={48} />
-                              </div>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => removeFile(orderIndex)}
-                              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                              aria-label="Remove file"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
                 </div>
               )}
             </form>
@@ -363,7 +278,7 @@ export default function CreateSessionPage() {
               Atrás
             </Button>
           )}
-          {step < 3 ? (
+          {step < 2 ? (
             <Button type="button" onClick={() => setStep(step + 1)}>
               Siguiente
             </Button>
@@ -373,7 +288,7 @@ export default function CreateSessionPage() {
               disabled={isSubmitting}
               onClick={form.handleSubmit(onSubmit)}
             >
-              {isSubmitting ? "Creando..." : "Crear Sesión"}
+              {isSubmitting ? "Actualizando..." : "Actualizar Sesión"}
             </Button>
           )}
         </CardFooter>
