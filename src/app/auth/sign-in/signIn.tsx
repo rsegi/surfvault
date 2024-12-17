@@ -1,13 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Icons } from "@/components/icons";
 import React from "react";
-import {
-  handleCredentialsSignIn,
-  handleGoogleSignIn,
-} from "@/lib/auth/signInServerAction";
+import { handleCredentialsSignIn } from "@/lib/auth/signInServerAction";
 import {
   Form,
   FormControl,
@@ -62,29 +57,6 @@ export default function SignInPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-8 text-sm text-foreground">
-          <p className="text-muted-foreground text-center">
-            Selecciona un m&eacute;todo
-          </p>
-          <Button
-            variant="outline"
-            className="w-full font-semibold"
-            onClick={() => handleGoogleSignIn()}
-          >
-            <Icons.google className="mr-2 h-4 w-4" />
-            Continuar con Google
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                O continuar con
-              </span>
-            </div>
-          </div>
-
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
