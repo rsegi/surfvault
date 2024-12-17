@@ -1,5 +1,3 @@
-import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
-import { redirect } from "next/navigation";
 import SessionsPage from "./sessions";
 import { Suspense } from "react";
 import SessionsSkeleton from "@/components/sessionLoading";
@@ -10,11 +8,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 const breadcrumbItems = [{ href: "/sessions", label: "Sesiones" }];
 
 export default async function Sessions() {
-  const isAuthenticated = await checkIsAuthenticated();
   const session = await auth();
-  if (!isAuthenticated) {
-    redirect("/auth/sign-in");
-  }
 
   const initialSessions = await getSessionsByUser(session!.user!.id!, 1, 5);
   const totalSessions = await getTotalSessionsCount(session!.user!.id!);

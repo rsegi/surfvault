@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { createSession } from "@/lib/createSessionServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -361,6 +362,7 @@ export default function CreateSessionPage() {
             <Button
               type="button"
               variant="outline"
+              disabled={isSubmitting}
               onClick={() => setStep(step - 1)}
             >
               Atrás

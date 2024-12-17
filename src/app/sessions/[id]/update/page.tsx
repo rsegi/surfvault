@@ -1,5 +1,4 @@
-import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import UpdateSessionPage from "./updateSession";
 import { getSessionById } from "api/session/session";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -9,11 +8,6 @@ export default async function UpdateSession({
 }: {
   params: { id: string };
 }) {
-  const isAuthenticated = await checkIsAuthenticated();
-  if (!isAuthenticated) {
-    redirect("/auth/sign-in");
-  }
-
   const session = await getSessionById(params.id);
 
   const breadcrumbItems = [

@@ -17,8 +17,8 @@ import { deleteAccount } from "@/lib/deleteAccountServerAction";
 import { signOut } from "next-auth/react";
 
 export default function AccountPage() {
-  const user = useCurrentUser();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const user = useCurrentUser();
 
   const handleDelete = async () => {
     if (!user?.id) {
