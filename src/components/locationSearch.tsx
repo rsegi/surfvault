@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GeocodingResponse, getLocationByText } from "api/open-meteo/location";
-import { CountryFlag } from "@/utils/countryFlag";
 
 interface LocationInputProps {
   setLatitude: (latitude: number) => void;
@@ -104,13 +103,12 @@ export default function LocationSearch({
                   className="w-full flex justify-start items-center p-2"
                   onClick={() => handleSelect(location)}
                 >
-                  <span>
-                    {
-                      CountryFlag[
-                        location.country_code as keyof typeof CountryFlag
-                      ]
-                    }
-                  </span>
+                  <img
+                    src={`https://flagcdn.com/w40/${location.country_code.toLowerCase()}.png`}
+                    alt={location.country_code}
+                    width="20"
+                    height="15"
+                  />
                   {location.name}, {location.admin1}, {location.country}
                 </Button>
               ))

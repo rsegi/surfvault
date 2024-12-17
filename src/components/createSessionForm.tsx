@@ -37,7 +37,7 @@ import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import Image from "next/image";
-import LocationSearch from "./ui/locationSearch";
+import LocationSearch from "./locationSearch";
 import LocationMarker from "./locationMarker";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";

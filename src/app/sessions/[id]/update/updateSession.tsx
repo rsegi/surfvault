@@ -25,7 +25,7 @@ import {
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
-import LocationSearch from "@/components/ui/locationSearch";
+import LocationSearch from "@/components/locationSearch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SessionResponse } from "api/session/session";

@@ -28,7 +28,7 @@ import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
 import Image from "next/image";
-import LocationSearch from "@/components/ui/locationSearch";
+import LocationSearch from "@/components/locationSearch";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
 import { createSession } from "@/lib/createSessionServerAction";
