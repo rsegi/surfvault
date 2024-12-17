@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { useMap, useMapEvents } from "react-leaflet/hooks";
 import { Marker } from "react-leaflet/Marker";
 import "leaflet/dist/leaflet.css";
-import markerIconPng from "leaflet/dist/images/marker-icon.png";
-import markerIconShadowPng from "leaflet/dist/images/marker-shadow.png";
 
 interface LocationMarkerProps {
   latitude: number;
@@ -14,9 +12,9 @@ interface LocationMarkerProps {
 }
 
 L.Icon.Default.mergeOptions({
-  iconUrl: markerIconPng,
-  shadowUrl: markerIconShadowPng,
-  iconRetinaUrl: markerIconPng,
+  iconRetinaUrl: "/marker-icon-2x.png",
+  iconUrl: "/marker-icon.png",
+  shadowUrl: "/marker-shadow.png",
 });
 
 export default function LocationMarker({

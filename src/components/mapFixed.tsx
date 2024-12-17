@@ -1,14 +1,13 @@
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-// import L from "leaflet";
+import L from "leaflet";
 
-// Fix for default marker icon
-// delete (L.Icon.Default.prototype as any)._getIconUrl
-// L.Icon.Default.mergeOptions({
-//   iconRetinaUrl: '/images/marker-icon-2x.png',
-//   iconUrl: '/images/marker-icon.png',
-//   shadowUrl: '/images/marker-shadow.png',
-// })
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "/marker-icon-2x.png",
+  iconUrl: "/marker-icon.png",
+  shadowUrl: "/marker-shadow.png",
+});
 
 interface MapProps {
   center: [number, number];
@@ -31,7 +30,10 @@ export default function MapFixed({ center, zoom, className }: MapProps) {
       keyboard={false}
       attributionControl={false}
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
       <Marker position={center} />
     </MapContainer>
   );

@@ -31,10 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Spinner } from "@/components/ui/spinner";
-
-const MapWithNoSSR = dynamic(() => import("@/components/mapFixed"), {
-  ssr: false,
-});
+import MapFixed from "@/components/mapFixed";
 
 function InfoItem({ icon, value }: { icon: React.ReactNode; value: string }) {
   return (
@@ -130,7 +127,7 @@ export default function SessionsPage({
                         <CarouselContent className="my-2">
                           {session.fileUrls.map((file, index) => (
                             <CarouselItem key={index} className="h-full w-full">
-                              <div className="h-96 w-full">
+                              <div className="h-96 w-full relative">
                                 <Image
                                   src={file.url}
                                   alt={`${file.name}`}
@@ -206,18 +203,16 @@ export default function SessionsPage({
                         </span>
                       </div>
                     </div>
-                    {isClient && (
-                      <div className="w-48 h-24">
-                        <MapWithNoSSR
-                          center={[
-                            parseFloat(session.latitude),
-                            parseFloat(session.longitude),
-                          ]}
-                          zoom={10}
-                          className="h-full w-full rounded-md"
-                        />
-                      </div>
-                    )}
+                    <div className="w-48 h-24">
+                      <MapFixed
+                        center={[
+                          parseFloat(session.latitude),
+                          parseFloat(session.longitude),
+                        ]}
+                        zoom={10}
+                        className="h-full w-full rounded-md"
+                      />
+                    </div>
                   </div>
                 </Link>
               </CardContent>
