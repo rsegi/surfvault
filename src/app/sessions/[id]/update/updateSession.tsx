@@ -26,7 +26,6 @@ import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
 import LocationSearch from "@/components/ui/locationSearch";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SessionResponse } from "api/session/session";
@@ -73,7 +72,6 @@ export default function UpdateSessionPage({
   session: SessionResponse;
 }) {
   const router = useRouter();
-  const user = useCurrentUser();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,12 +88,6 @@ export default function UpdateSessionPage({
   });
 
   const onSubmit = async (values: z.infer<typeof updateSessionSchema>) => {
-    if (!user?.id) {
-      console.error("Usuario no autenticado");
-      toast.error("Debes estar autenticado para actualizar una sesión.");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -109,20 +101,15 @@ export default function UpdateSessionPage({
       formData.append("previousLongitude", session.longitude);
       formData.append("previousDate", `${session.date}`);
 
-      const result = await updateSession(formData);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
+      await updateSession(formData);
 
       toast.success("Sesión editada con éxito.");
+      router.push(`${DEFAULT_LOGIN_REDIRECT}/${session.id}`);
     } catch (error) {
       console.error("Error updating session:", error);
       toast.error("Error editando la sesión. Por favor, prueba de nuevo.");
     } finally {
       setIsSubmitting(false);
-      router.push(`/sessions/${session.id}`);
-      // window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${session.id}`;
     }
   };
 

@@ -34,7 +34,6 @@ import { toast } from "sonner";
 import { createSession } from "@/lib/createSessionServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@/components/ui/spinner";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -93,20 +92,15 @@ export default function CreateSessionPage() {
       latitude: 0,
       longitude: 0,
     },
+    mode: "onBlur",
   });
 
   const onSubmit = async (values: z.infer<typeof createSessionSchema>) => {
-    if (!user?.id) {
-      console.error("Usuario no autenticado");
-      toast.error("Debes estar autenticado para crear una sesión.");
-      return;
-    }
-
     let sessionId = "";
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("userId", user.id);
+      formData.append("userId", user!.id!);
       formData.append("latitude", values.latitude.toString());
       formData.append("longitude", values.longitude.toString());
       formData.append("title", values.title);
@@ -121,18 +115,14 @@ export default function CreateSessionPage() {
 
       const result = await createSession(formData);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
       sessionId = result!.createdSession;
       toast.success("Sesión creada con éxito.");
+      router.push(`${DEFAULT_LOGIN_REDIRECT}/${sessionId}`);
     } catch (error) {
       console.error("Error creating session:", error);
       toast.error("Error creando la sesión. Por favor, prueba de nuevo.");
     } finally {
       setIsSubmitting(false);
-      // window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${sessionId}`;
-      router.push(`${DEFAULT_LOGIN_REDIRECT}/${sessionId}`);
     }
   };
 
@@ -291,6 +281,7 @@ export default function CreateSessionPage() {
                             "location",
                             `${lat}, ${form.getValues("longitude")}`
                           );
+                          form.trigger("location");
                         }}
                         setLongitude={(lng) => {
                           form.setValue("longitude", lng);
@@ -298,6 +289,7 @@ export default function CreateSessionPage() {
                             "location",
                             `${form.getValues("latitude")}, ${lng}`
                           );
+                          form.trigger("location");
                         }}
                         latitude={form.watch("latitude")}
                         longitude={form.watch("longitude")}
@@ -314,7 +306,8 @@ export default function CreateSessionPage() {
                       id="media"
                       type="file"
                       multiple
-                      accept="image/*,video/*"
+                      max={6}
+                      accept="image/jpeg,image/png,image/webp,video/mp4"
                       onChange={handleFileChange}
                     />
                   </div>
@@ -369,13 +362,17 @@ export default function CreateSessionPage() {
             </Button>
           )}
           {step < 3 ? (
-            <Button type="button" onClick={() => setStep(step + 1)}>
+            <Button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => setStep(step + 1)}
+            >
               Siguiente
             </Button>
           ) : (
             <Button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !form.formState.isValid}
               onClick={form.handleSubmit(onSubmit)}
             >
               {isSubmitting ? "Creando..." : "Crear Sesión"}

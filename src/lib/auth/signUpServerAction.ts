@@ -21,6 +21,7 @@ export async function signUp(values: SignUp) {
     });
 
     if (existingUser) {
+      console.log("Usuario ya registrado");
       return { error: "El usuario ya está registrado" };
     }
 

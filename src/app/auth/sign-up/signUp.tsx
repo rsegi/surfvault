@@ -26,6 +26,7 @@ import {
 import Link from "next/link";
 import { signUp } from "@/lib/auth/signUpServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { AuthError } from "next-auth";
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -45,21 +46,24 @@ export default function SignUpPage() {
       const result = await signUp(data);
 
       if (result?.error) {
-        toast.error("Error de registro", {
-          description: result.error,
-        });
-        return;
+        throw new AuthError(result.error);
       }
 
       toast.success("Registro exitoso");
       await handleCredentialsSignIn(form.getValues());
-    } catch {
-      toast.error("Error de registro", {
-        description: "Ha ocurrido un error inesperado",
-      });
+      window.location.href = DEFAULT_LOGIN_REDIRECT;
+    } catch (e) {
+      if (e instanceof AuthError) {
+        toast.error("Error de registro", {
+          description: e.message.split(".")[0],
+        });
+      } else {
+        toast.error("Error de registro", {
+          description: "Ha ocurrido un error inesperado",
+        });
+      }
     } finally {
       setIsLoading(false);
-      window.location.href = DEFAULT_LOGIN_REDIRECT;
     }
   };
 

@@ -6,10 +6,7 @@ export const signInSchema = z.object({
     .max(21, "El usuario debe tener menos de 21 carácteres"),
   password: string({ required_error: "La contraseña es obligatoria" })
     .min(1, "La contraseña es obligatoria")
-    .min(
-      8,
-      "La contraseña debe tener más de 8 carácteresmust be more than 8 characters"
-    )
+    .min(8, "La contraseña debe tener más de 8 carácteres")
     .max(32, "La contraseña debe tener menos de 32 carácteres"),
 });
 
@@ -24,10 +21,7 @@ export const signUpSchema = z.object({
     .max(21, "El usuario debe tener menos de 21 carácteres"),
   password: string({ required_error: "La contraseña es obligatoria" })
     .min(1, "La contraseña es obligatoria")
-    .min(
-      8,
-      "La contraseña debe tener más de 8 carácteresmust be more than 8 characters"
-    )
+    .min(8, "La contraseña debe tener más de 8 carácteres")
     .max(32, "La contraseña debe tener menos de 32 carácteres"),
 });
 
