@@ -1,6 +1,9 @@
 import { db } from "db";
 import { users } from "db/schema";
-import { eq } from "drizzle-orm";
+import { eq, ExtractTablesWithRelations } from "drizzle-orm";
+import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import * as schema from "../../db/schema";
 
 export const getUserById = async (id: string) => {
   try {
@@ -21,5 +24,20 @@ export const getUserByUsername = async (username: string) => {
     return user;
   } catch {
     return undefined;
+  }
+};
+
+export const deleteUserById = async (
+  id: string,
+  tx: PgTransaction<
+    NodePgQueryResultHKT,
+    typeof schema,
+    ExtractTablesWithRelations<typeof schema>
+  >
+) => {
+  try {
+    await tx.delete(users).where(eq(users.id, id));
+  } catch (e) {
+    console.error(e);
   }
 };

@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/components/icons";
 import React from "react";
-import { handleGoogleSignIn } from "@/lib/auth/signInServerAction";
+import {
+  handleCredentialsSignIn,
+  handleGoogleSignIn,
+} from "@/lib/auth/signInServerAction";
 import {
   Form,
   FormControl,
@@ -17,7 +20,6 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { SignUp, signUpSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Card,
@@ -28,9 +30,9 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { signUp } from "@/lib/auth/signUpServerAction";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<SignUp>({
@@ -55,13 +57,14 @@ export default function SignUpPage() {
       }
 
       toast.success("Registro exitoso");
-      router.push("/sessions");
+      await handleCredentialsSignIn(form.getValues());
     } catch {
       toast.error("Error de registro", {
         description: "Ha ocurrido un error inesperado",
       });
     } finally {
       setIsLoading(false);
+      window.location.href = DEFAULT_LOGIN_REDIRECT;
     }
   };
 

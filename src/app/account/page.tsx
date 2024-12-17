@@ -1,23 +1,19 @@
 import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
 import { redirect } from "next/navigation";
-import CreateSessionPage from "./createSession";
+import AccountPage from "./account";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
-const breadcrumbItems = [
-  { href: "/sessions", label: "Sesiones" },
-  { label: "Crear Sesión" },
-];
+const breadcrumbItems = [{ href: `/account`, label: `Mi cuenta` }];
 
-export default async function CreateSession() {
+export default async function Account() {
   const isAuthenticated = await checkIsAuthenticated();
   if (!isAuthenticated) {
     redirect("/auth/sign-in");
   }
-
   return (
     <>
       <Breadcrumbs items={breadcrumbItems} />
-      <CreateSessionPage />
+      <AccountPage />
     </>
   );
 }

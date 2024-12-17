@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import SessionsSkeleton from "@/components/sessionLoading";
 import { getSessionsByUser } from "api/session/session";
 import { auth } from "@/auth";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+
+const breadcrumbItems = [{ href: "/sessions", label: "Sesiones" }];
 
 export default async function Sessions() {
   const isAuthenticated = await checkIsAuthenticated();
@@ -16,8 +19,11 @@ export default async function Sessions() {
   const sessions = await getSessionsByUser(session!.user!.id!);
 
   return (
-    <Suspense fallback={<SessionsSkeleton />}>
-      <SessionsPage sessions={sessions} />
-    </Suspense>
+    <>
+      <Breadcrumbs items={breadcrumbItems} />
+      <Suspense fallback={<SessionsSkeleton />}>
+        <SessionsPage sessions={sessions} />
+      </Suspense>
+    </>
   );
 }

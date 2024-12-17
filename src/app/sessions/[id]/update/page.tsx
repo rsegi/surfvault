@@ -2,6 +2,7 @@ import { checkIsAuthenticated } from "@/lib/auth/checkIsAuthenticated";
 import { notFound, redirect } from "next/navigation";
 import UpdateSessionPage from "./updateSession";
 import { getSessionById } from "api/session/session";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default async function UpdateSession({
   params,
@@ -15,9 +16,20 @@ export default async function UpdateSession({
 
   const session = await getSessionById(params.id);
 
+  const breadcrumbItems = [
+    { href: `/sessions`, label: "Sesiones" },
+    { href: `/sessions/${params.id}`, label: `${session.title}` },
+    { label: "Editar" },
+  ];
+
   if (!session) {
     notFound();
   }
 
-  return <UpdateSessionPage session={session} />;
+  return (
+    <>
+      <Breadcrumbs items={breadcrumbItems} />
+      <UpdateSessionPage session={session} />
+    </>
+  );
 }

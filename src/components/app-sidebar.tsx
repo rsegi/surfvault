@@ -19,19 +19,15 @@ import Link from "next/link";
 // Authenticated Menu items.
 const authenticatedItems = [
   {
-    title: "Subir sesión",
-    url: "/sessions/upload",
-  },
-  {
     title: "Mis sesiones",
     url: "/sessions",
   },
   {
-    title: "Mi mapa",
-    url: "#",
+    title: "Mi cuenta",
+    url: "/account",
   },
   {
-    title: "Mi cuenta",
+    title: "Mi mapa",
     url: "#",
   },
 ];

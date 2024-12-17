@@ -55,6 +55,7 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { useRouter } from "next/navigation";
 import { removeSeconds, roundTimeToHour } from "@/utils/timeUtils";
 import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
+import ConfirmationDialog from "@/components/confirmationDialog";
 
 const getBarColor = (waveHeight: number) => {
   if (waveHeight < 0.5) return "hsl(0, 100%, 50%)";
@@ -71,6 +72,7 @@ export default function SessionDetailPage({
   const [selectedDateTime, setSelectedDateTime] = useState<string>(
     roundTimeToHour(session.time)
   );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
 
   const selectedCondition = useMemo(() => {
@@ -115,10 +117,6 @@ export default function SessionDetailPage({
             <CardTitle className="text-3xl font-bold">
               {session.title}
             </CardTitle>
-            {/* <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <span>{session.location}</span>
-          </div> */}
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>{getSessionDate()}</span>
@@ -126,17 +124,23 @@ export default function SessionDetailPage({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+              <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+                <span className="sr-only">Abrir men&uacute;</span>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleUpdate}>
+              <DropdownMenuItem
+                onClick={handleUpdate}
+                className="cursor-pointer"
+              >
                 <Pencil className="mr-2 h-4 w-4" />
                 <span>Editar</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDelete}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Eliminar</span>
               </DropdownMenuItem>
@@ -300,6 +304,17 @@ export default function SessionDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmationDialog
+        confirmButtonText="Eliminar Sesi&oacute;n"
+        descriptionText="Esta sesi&oacute;n ser&aacute; borrada junto a todos los datos
+                asociados."
+        title="Est&aacute;s seguro de que deseas eliminar la sesi&oacute;n?"
+        descriptionHighlight="Esta operaci&oacute;n es irreversible."
+        handleConfirm={handleDelete}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+      />
     </div>
   );
 }
