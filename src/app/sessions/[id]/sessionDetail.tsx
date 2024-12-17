@@ -56,6 +56,7 @@ import { useRouter } from "next/navigation";
 import { removeSeconds, roundTimeToHour } from "@/utils/timeUtils";
 import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
 import ConfirmationDialog from "@/components/confirmationDialog";
+import { CategoricalChartState } from "recharts/types/chart/types";
 
 const getBarColor = (waveHeight: number) => {
   if (waveHeight < 0.5) return "hsl(0, 100%, 50%)";
@@ -83,7 +84,7 @@ export default function SessionDetailPage({
     );
   }, [session.surfConditions, selectedDateTime]);
 
-  const handleChartClick = (data: any) => {
+  const handleChartClick = (data: CategoricalChartState) => {
     if (data && data.activePayload && data.activePayload[0]) {
       setSelectedDateTime(data.activePayload[0].payload.dateTime);
     }

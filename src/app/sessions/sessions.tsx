@@ -14,7 +14,6 @@ import Image from "next/image";
 import { SessionResponse } from "api/session/session";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
 import { WeatherCode } from "@/utils/weatherCode";
 import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
 import { Separator } from "@/components/ui/separator";
@@ -31,7 +30,11 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Spinner } from "@/components/ui/spinner";
-import MapFixed from "@/components/mapFixed";
+import dynamic from "next/dynamic";
+
+const MapWithNoSSR = dynamic(() => import("@/components/mapFixed"), {
+  ssr: false,
+});
 
 function InfoItem({ icon, value }: { icon: React.ReactNode; value: string }) {
   return (
@@ -203,16 +206,18 @@ export default function SessionsPage({
                         </span>
                       </div>
                     </div>
-                    <div className="w-48 h-24">
-                      <MapFixed
-                        center={[
-                          parseFloat(session.latitude),
-                          parseFloat(session.longitude),
-                        ]}
-                        zoom={10}
-                        className="h-full w-full rounded-md"
-                      />
-                    </div>
+                    {isClient && (
+                      <div className="w-48 h-24">
+                        <MapWithNoSSR
+                          center={[
+                            parseFloat(session.latitude),
+                            parseFloat(session.longitude),
+                          ]}
+                          zoom={10}
+                          className="h-full w-full rounded-md"
+                        />
+                      </div>
+                    )}
                   </div>
                 </Link>
               </CardContent>
