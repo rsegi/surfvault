@@ -1,6 +1,6 @@
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
-import { asc, desc, eq, ExtractTablesWithRelations } from "drizzle-orm";
+import { asc, count, desc, eq, ExtractTablesWithRelations } from "drizzle-orm";
 import { db } from "db";
 import * as schema from "../../db/schema";
 import {
@@ -54,9 +54,12 @@ export const insertSession = async (
 };
 
 export const getSessionsByUser = async (
-  userId: string
+  userId: string,
+  page: number = 1,
+  itemsPerPage: number = 5
 ): Promise<SessionResponse[]> => {
-  const preparedUserSessions = await db.query.sessions
+  const offset = (page - 1) * itemsPerPage;
+  const userSessions = await db.query.sessions
     .findMany({
       with: {
         surfConditions: {
@@ -65,10 +68,10 @@ export const getSessionsByUser = async (
       },
       where: eq(sessions.userId, userId),
       orderBy: [desc(schema.sessions.date)],
+      limit: itemsPerPage,
+      offset: offset,
     })
-    .prepare("getSessionsByUser");
-
-  const userSessions = await preparedUserSessions.execute();
+    .execute();
 
   const fileUrlsPromises = userSessions.map((session) =>
     getFilesFromBucketByPrefix(`${session.id}/`)
@@ -84,6 +87,18 @@ export const getSessionsByUser = async (
   );
 
   return sessionsWithFiles;
+};
+
+export const getTotalSessionsCount = async (
+  userId: string
+): Promise<number> => {
+  const result = await db
+    .select({ count: count() })
+    .from(sessions)
+    .where(eq(sessions.userId, userId))
+    .execute();
+
+  return result[0].count;
 };
 
 export const getSessionById = async (id: string): Promise<SessionResponse> => {

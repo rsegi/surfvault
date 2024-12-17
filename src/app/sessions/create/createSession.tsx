@@ -33,6 +33,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
 import { createSession } from "@/lib/createSessionServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { useRouter } from "next/navigation";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -79,6 +80,7 @@ export default function CreateSessionPage() {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [fileOrder, setFileOrder] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof createSessionSchema>>({
     resolver: zodResolver(createSessionSchema),
@@ -128,7 +130,8 @@ export default function CreateSessionPage() {
       toast.error("Error creando la sesión. Por favor, prueba de nuevo.");
     } finally {
       setIsSubmitting(false);
-      window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${sessionId}`;
+      // window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${sessionId}`;
+      router.push(`${DEFAULT_LOGIN_REDIRECT}/${sessionId}`);
     }
   };
 
