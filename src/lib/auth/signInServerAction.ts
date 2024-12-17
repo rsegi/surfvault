@@ -4,14 +4,6 @@ import { signIn } from "@/auth";
 import { SignIn, signInSchema } from "../zod";
 import { AuthError } from "next-auth";
 
-export const handleGoogleSignIn = async () => {
-  try {
-    await signIn("google", { redirectTo: "/sessions" });
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const handleCredentialsSignIn = async (values: SignIn) => {
   const validatedFields = signInSchema.safeParse(values);
 
