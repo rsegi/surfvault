@@ -13,6 +13,7 @@ services:
       - .env.local
     environment:
       - IS_DOCKER=true
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/surfvault?schema=public
     develop:
       watch:
         - action: sync
