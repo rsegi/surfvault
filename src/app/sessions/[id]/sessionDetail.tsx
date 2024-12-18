@@ -57,6 +57,22 @@ import { removeSeconds, roundTimeToHour } from "@/utils/timeUtils";
 import { getDirectionFromDegrees } from "@/utils/getDirectionFromDegrees";
 import ConfirmationDialog from "@/components/confirmationDialog";
 import { CategoricalChartState } from "recharts/types/chart/types";
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+import React from "react";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
 
 const getBarColor = (waveHeight: number) => {
   if (waveHeight < 0.5) return "hsl(0, 100%, 50%)";
@@ -74,6 +90,7 @@ export default function SessionDetailPage({
     roundTimeToHour(session.time)
   );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   const selectedCondition = useMemo(() => {
@@ -109,6 +126,11 @@ export default function SessionDetailPage({
   const getSessionDate = () => {
     return format(session.date, "dd/MM/yyyy");
   };
+
+  // Use useEffect to handle client-side rendering of the map
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -303,6 +325,30 @@ export default function SessionDetailPage({
               />
             </div>
           </div>
+          <Separator className="my-8" />
+          {isClient && (
+            <div className="w-full h-[400px] rounded-lg overflow-hidden">
+              <MapContainer
+                center={[
+                  parseFloat(session.latitude),
+                  parseFloat(session.longitude),
+                ]}
+                zoom={13}
+                className="h-full w-full"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker
+                  position={[
+                    parseFloat(session.latitude),
+                    parseFloat(session.longitude),
+                  ]}
+                />
+              </MapContainer>
+            </div>
+          )}
         </CardContent>
       </Card>
 
