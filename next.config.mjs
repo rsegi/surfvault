@@ -4,10 +4,16 @@ const nextConfig = {
     images: {
         remotePatterns: [
             {
-              protocol: 'http', // Change to 'https' if you're using HTTPS for Minio
+              protocol: 'http',
               hostname: 'localhost',
-              port: '9000', // The Minio instance port
-              pathname: '/surfvault/**', // Matches the prefix of your Minio URL path
+              port: '9000',
+              pathname: '/surfvault/**',
+            },
+            {
+              protocol: 'http',
+              hostname: 'host.docker.internal',
+              port: '9000',
+              pathname: '/surfvault/**',
             },
           ],
     }

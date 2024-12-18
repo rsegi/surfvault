@@ -9,13 +9,10 @@ services:
         NEXT_PUBLIC_CLIENTVAR: 'clientvar'
     ports:
       - 3000:3000
+    env_file:
+      - .env.local
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/surfvault?schema=public
-      - S3_ENDPOINT=minio
-      - S3_PORT=9000
-      - S3_ACCESS_KEY=minio
-      - S3_SECRET_KEY=miniosecret
-      - S3_BUCKET_NAME=s3bucket
+      - IS_DOCKER=true
     develop:
       watch:
         - action: sync

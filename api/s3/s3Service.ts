@@ -3,12 +3,13 @@ import * as Minio from "minio";
 import internal from "stream";
 
 const BUCKET_NAME = "surfvault";
+const isDocker = process.env.IS_DOCKER === "true";
 
 export const s3Client = new Minio.Client({
-  endPoint: process.env.S3_ENDPOINT!,
+  endPoint: isDocker ? process.env.S3_ENDPOINT! : "localhost",
   port: process.env.S3_PORT ? Number(process.env.S3_PORT) : undefined,
-  accessKey: process.env.S3_USER!,
-  secretKey: process.env.S3_SECRET!,
+  accessKey: process.env.MINIO_ROOT_USER!,
+  secretKey: process.env.MINIO_ROOT_PASSWORD!,
   useSSL: process.env.S3_USE_SSL === "true",
 });
 

@@ -109,11 +109,7 @@ export default function CreateSessionModal() {
         formData.append(`file${index}`, fileWithPreview.file);
       });
 
-      const result = await createSession(formData);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
+      await createSession(formData);
 
       setOpen(false);
       setStep(1);

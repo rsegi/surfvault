@@ -26,28 +26,21 @@ export const createSession = async (formData: FormData) => {
       return;
     }
 
-    const filePromises = [];
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith("file") && value instanceof File) {
-        const file = value;
-        const fileKey = key.replace("file", "fileType");
-        const fileType = formData.get(fileKey) as string;
-
-        const fileBuffer = await file.arrayBuffer();
-        const savePromise = saveFileInBucket(
-          `${createdSession.createdSession}/${key}`,
-          Buffer.from(fileBuffer),
-          fileType
-        ).catch((error) => {
-          console.error(`Failed to save file ${key}:`, error);
-          throw error;
-        });
-        filePromises.push(savePromise);
-      }
-    }
-
     try {
-      await Promise.all(filePromises);
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith("file") && value instanceof File) {
+          const file = value;
+          const fileKey = key.replace("file", "fileType");
+          const fileType = formData.get(fileKey) as string;
+
+          const fileBuffer = await file.arrayBuffer();
+          await saveFileInBucket(
+            `${createdSession.createdSession}/${key}`,
+            Buffer.from(fileBuffer),
+            fileType
+          );
+        }
+      }
     } catch (error) {
       console.error("Error saving files:", error);
       tx.rollback();

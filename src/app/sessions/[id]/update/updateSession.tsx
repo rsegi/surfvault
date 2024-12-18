@@ -27,7 +27,6 @@ import "leaflet/dist/leaflet.css";
 
 import LocationSearch from "@/components/locationSearch";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { SessionResponse } from "api/session/session";
 import { updateSession } from "@/lib/updateSessionServerAction";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
@@ -71,7 +70,6 @@ export default function UpdateSessionPage({
 }: {
   session: SessionResponse;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -104,7 +102,7 @@ export default function UpdateSessionPage({
       await updateSession(formData);
 
       toast.success("Sesión editada con éxito.");
-      router.push(`${DEFAULT_LOGIN_REDIRECT}/${session.id}`);
+      window.location.href = `${DEFAULT_LOGIN_REDIRECT}/${session.id}`;
     } catch (error) {
       console.error("Error updating session:", error);
       toast.error("Error editando la sesión. Por favor, prueba de nuevo.");

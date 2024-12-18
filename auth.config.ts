@@ -1,5 +1,6 @@
 import { signInSchema } from "@/lib/zod";
 import { verifyPassword } from "@/utils/password";
+import { User } from "@auth/core/types";
 import { getUserByUsername } from "api/user/user";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -20,7 +21,7 @@ export default {
 
           const isAuthenticated = await verifyPassword(password, user.password);
           if (isAuthenticated) {
-            return user;
+            return user as User;
           }
         }
 

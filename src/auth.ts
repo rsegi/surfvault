@@ -9,6 +9,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     usersTable: users,
     accountsTable: accounts,
   }),
+  trustHost: true,
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 1 day in seconds
@@ -23,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.username = token.username;
+        session.user.username = token.username as string;
       }
       return session;
     },
