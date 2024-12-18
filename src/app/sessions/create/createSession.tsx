@@ -263,8 +263,8 @@ export default function CreateSessionPage() {
                   />
                   <div className="h-[600px] w-full rounded-md overflow-hidden">
                     <MapContainer
-                      center={[37.8, -122.4]}
-                      zoom={14}
+                      center={[41.375, 2.1993]}
+                      zoom={12}
                       className="h-full w-full"
                     >
                       <TileLayer

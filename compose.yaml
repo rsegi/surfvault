@@ -44,9 +44,8 @@ services:
     ports:
       - '9000:9000'
       - '9001:9001'
-    environment:
-      MINIO_ROOT_USER: surfvault
-      MINIO_ROOT_PASSWORD: w32lkp90
+    env_file:
+      - .env.local
     volumes:
       - minio_storage:/data
 volumes:
