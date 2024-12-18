@@ -20,7 +20,7 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
    - Crea un nuevo archivo llamado `.env.local` en la raíz y pega el contenido copiado.
 
 2. **Generar el secreto para Auth**:
-   - Ejecuta el siguiente comando en la terminal:
+   - Ejecuta el siguiente comando desde la raíz del proyecto en la terminal:
      ```bash
      npx auth secret
      ```
@@ -60,7 +60,7 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
      npm install
      ```
      
-   - Una ver terminada la instalación, ejecuta:
+   - Una ver terminada la instalación, desde la raíz ejecuta:
      ```bash
      npx drizzle-kit studio
      ```
