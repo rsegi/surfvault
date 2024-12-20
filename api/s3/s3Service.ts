@@ -2,7 +2,7 @@ import { FileUrl } from "api/session/session";
 import * as Minio from "minio";
 import internal from "stream";
 
-const BUCKET_NAME = "surfvault";
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "surfvault";
 const isDocker = process.env.IS_DOCKER === "true";
 
 export const s3Client = new Minio.Client({
@@ -44,16 +44,11 @@ export const getFileFromBucket = async (fileName: string) => {
 
 const listFilesFromBucketByPrefix = async (prefix: string) => {
   const files = [];
-  try {
-    const stream = s3Client.listObjectsV2(BUCKET_NAME, prefix);
-    for await (const obj of stream) {
-      if (obj.name) {
-        files.push({ name: obj.name });
-      }
+  const stream = s3Client.listObjectsV2(BUCKET_NAME, prefix);
+  for await (const obj of stream) {
+    if (obj.name) {
+      files.push({ name: obj.name });
     }
-  } catch (error) {
-    console.error("Error listing files from bucket:", error);
-    throw error;
   }
   return files;
 };
@@ -86,29 +81,15 @@ export const getFilesFromBucketByPrefix = async (prefix: string) => {
 };
 
 export const deleteFilesFromBucketByPrefix = async (prefix: string) => {
-  try {
-    const files = await listFilesFromBucketByPrefix(prefix);
+  const files = await listFilesFromBucketByPrefix(prefix);
 
-    for (const file of files) {
-      try {
-        await deleteFileFromBucket(file.name);
-      } catch (err) {
-        console.error(`Error deleting content for ${file.name}:`, err);
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching files from bucket:", error);
+  for (const file of files) {
+    await deleteFileFromBucket(file.name);
   }
 };
 
 export const deleteFileFromBucket = async (fileName: string) => {
-  try {
-    await s3Client.removeObject(BUCKET_NAME, fileName);
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-  return true;
+  await s3Client.removeObject(BUCKET_NAME, fileName);
 };
 
 export const createPresignedUrlToUpload = async (

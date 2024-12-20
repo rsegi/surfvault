@@ -102,7 +102,7 @@ export const getTotalSessionsCount = async (
 };
 
 export const getSessionById = async (id: string): Promise<SessionResponse> => {
-  const preparedSession = await db.query.sessions
+  const preparedSession = db.query.sessions
     .findFirst({
       with: {
         surfConditions: {
@@ -133,14 +133,7 @@ export const deleteSessionById = async (
   >,
   id: string
 ): Promise<void> => {
-  try {
-    await tx
-      .delete(sessions)
-      .where(eq(sessions.id, id))
-      .returning({ deletedSession: sessions.id });
-  } catch (e) {
-    console.error("Error deleting session:", e);
-  }
+  await tx.delete(sessions).where(eq(sessions.id, id));
 };
 
 export const updateSessionById = async (

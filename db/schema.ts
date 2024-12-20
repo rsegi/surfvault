@@ -14,8 +14,12 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { relations } from "drizzle-orm";
 
-const connectionString = "postgres://postgres:postgres@localhost:5432/drizzle";
-const pool = postgres(connectionString, { max: 1 });
+const isTestEnv = process.env.NODE_ENV === "test";
+
+const connectionString = isTestEnv
+  ? process.env.DATABASE_URL_TEST
+  : process.env.DATABASE_URL;
+const pool = postgres(connectionString!, { max: 1 });
 
 export const db = drizzle(pool);
 

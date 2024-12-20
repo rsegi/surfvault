@@ -11,9 +11,8 @@ export const deleteSession = async (id: string) => {
 
       await deleteFilesFromBucketByPrefix(`${id}/`);
     } catch (error) {
-      console.error("Error deleting session: ", error);
+      console.error("Error deleting session:", error);
       tx.rollback();
-      throw new Error("Failed to delete session");
     }
   });
 };

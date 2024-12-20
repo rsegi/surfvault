@@ -67,18 +67,23 @@ export const updateSurfConditionsBySessionId = async (
       return;
     }
     generatedSurfConditions.forEach(async (sc) => {
-      await tx
-        .update(surfConditions)
-        .set({ ...sc })
-        .where(
-          and(
-            eq(surfConditions.sessionId, sessionId),
-            eq(surfConditions.dateTime, sc.dateTime)
-          )
-        );
+      try {
+        await tx
+          .update(surfConditions)
+          .set({ ...sc })
+          .where(
+            and(
+              eq(surfConditions.sessionId, sessionId),
+              eq(surfConditions.dateTime, sc.dateTime)
+            )
+          );
+      } catch (e) {
+        console.error("Error updating surf conditions:", e);
+      }
     });
   } catch (e) {
     console.error("Error creating session:", e);
+    throw e;
   }
 };
 

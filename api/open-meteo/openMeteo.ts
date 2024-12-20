@@ -56,7 +56,7 @@ export const getForecastDataFromLocationAndDate = async (
   }
 };
 
-type MarineDataResponse = {
+export type MarineDataResponse = {
   timezone_abbreviation: string;
   hourly_units: {
     time: string;
@@ -72,7 +72,7 @@ type MarineDataResponse = {
   };
 };
 
-type ForecastDataResponse = {
+export type ForecastDataResponse = {
   timezone_abbreviation: string;
   hourly_units: {
     time: string;

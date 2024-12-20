@@ -30,8 +30,12 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
 ---
 
 ## Iniciar la aplicación
+1. Abre una terminal en la raen la raíz del proyecto y ejecuta el siguiente comando para instalar las dependencias:
+   ```bash
+   npm install
+   ```
 
-1. Abre una terminal en la raíz del proyecto y ejecuta el siguiente comando:
+2. Abre una terminal en la raíz del proyecto y ejecuta el siguiente comando:
    ```bash
    docker compose up --build
    ```
@@ -75,3 +79,16 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
   docker compose down
   ```
 - Asegúrate de que ningún otro servicio esté usando los puertos `3000`, `9000` y `5432`, o los configurados en tu archivo `.env.local` y `compose.yml`.
+
+## Ejecución de pruebas
+
+Para la ejecución de pruebas, es necesario tener el contenedor `postgres-test` y `minio` en ejecución.
+
+Una vez estén corriendo, ejecutar el siguiente comando desde la raíz del proyecto:
+   ```bash
+   npm run drizzle:push-test
+   ```
+Finalmente, ejecutar las pruebas desde el mismo directorio:
+   ```bash
+   npm run test
+   ```

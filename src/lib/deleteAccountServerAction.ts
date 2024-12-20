@@ -18,6 +18,7 @@ export const deleteAccount = async (userId: string) => {
     } catch (e) {
       console.error("Error deleting account:", e);
       tx.rollback();
+      throw new Error("Failed to delete user");
     }
   });
 };

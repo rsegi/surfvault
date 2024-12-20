@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
-    "drizzle:push": "npx drizzle-kit push",
-    "drizzle:studio": "npx drizzle-kit studio"
+    "drizzle:push": "npx drizzle-kit push --config=prod.drizzle.config.ts",
+    "drizzle:push-test": "npx drizzle-kit push --config=test.drizzle.config.ts",
+    "drizzle:studio": "npx drizzle-kit studio --config=prod.drizzle.config.ts",
+    "drizzle:studio-test": "npx drizzle-kit studio --config=test.drizzle.config.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.3",
@@ -69,10 +71,12 @@
     "eslint-config-next": "15.0.2",
     "eslint-config-prettier": "^9.1.0",
     "jsdom": "^25.0.1",
+    "msw": "^2.7.0",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.14",
     "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.3"
   }
 }
