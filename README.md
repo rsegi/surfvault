@@ -44,7 +44,7 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
      sudo docker compose up --build
      ```
 
-2. Una vez que la aplicación esté en funcionamiento, accede a través de tu navegador:
+3. Una vez que la aplicación esté en funcionamiento, accede a través de tu navegador:
    - [http://localhost:3000](http://localhost:3000)
 
 ---
@@ -66,7 +66,7 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
      
    - Una ver terminada la instalación, desde la raíz ejecuta:
      ```bash
-     npx drizzle-kit studio
+     npm run drizzle:studio
      ```
    - Luego, abre [https://local.drizzle.studio](https://local.drizzle.studio) en tu navegador.
 
