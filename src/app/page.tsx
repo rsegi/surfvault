@@ -13,8 +13,8 @@ export default function Page() {
           Bienvenido a <strong>SurfVault</strong>
         </h1>
         <p className="text-xl text-muted-foreground">
-          Discover the power of simplicity and innovation. Our product is
-          designed to make your life easier and more productive.
+          Cada ola es &uacute;nica: reg&icaute;strala, est&uacute;diala y vuelve
+          a ella cuando quieras.
         </p>
         <Button
           size="lg"
