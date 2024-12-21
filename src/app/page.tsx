@@ -13,7 +13,7 @@ export default function Page() {
           Bienvenido a <strong>SurfVault</strong>
         </h1>
         <p className="text-xl text-muted-foreground">
-          Cada ola es &uacute;nica: reg&icaute;strala, est&uacute;diala y vuelve
+          Cada ola es &uacute;nica: reg&iacute;strala, est&uacute;diala y vuelve
           a ella cuando quieras.
         </p>
         <Button
