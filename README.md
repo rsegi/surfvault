@@ -47,6 +47,13 @@ Esta guía detalla los pasos necesarios para configurar y ejecutar la aplicació
 3. Una vez que la aplicación esté en funcionamiento, accede a través de tu navegador:
    - [http://localhost:3000](http://localhost:3000)
 
+   **Importante:**
+
+   En algunas ocasiones, no te permitirá registrarte al iniciar la aplicación. Esto es debido a que el script para generar la base de datos no se ejecuta correctamente porque la base de datos esta reiniciando en el momento preciso que se ejecuta. Para solucionarlo, simplemente vuelve a ejecutar el script.
+   ```bash
+   docker compose up --build
+   ```
+
 ---
 
 ## Acceso a los Servicios
