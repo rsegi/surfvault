@@ -40,6 +40,10 @@ export const WeatherCode: { [code: number]: WeatherDescription } = {
     description: "Llovizna Intensa",
     image: "/weather/drizzle.svg",
   },
+  55: {
+    description: "Llovizna Intensa",
+    image: "/weather/drizzle.svg",
+  },
   56: {
     description: "Llovizna Gélida Ligera",
     image: "/weather/sleet.svg",
