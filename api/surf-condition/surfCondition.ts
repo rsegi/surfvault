@@ -31,10 +31,20 @@ export const createSurfConditions = async (
   }
 
   const surfConditionsWithSession = generatedSurfConditions.map(
-    (generatedCondition) => ({
-      sessionId,
-      ...generatedCondition,
-    })
+    (generatedCondition) =>
+      ({
+        sessionId,
+        dateTime: generatedCondition.dateTime,
+        waveHeight: generatedCondition.waveHeight ?? 0,
+        waveDirection: generatedCondition.waveDirection ?? 0,
+        wavePeriod: generatedCondition.wavePeriod ?? 0,
+        windSpeed: generatedCondition.windSpeed ?? 0,
+        windDirection: generatedCondition.windDirection ?? 0,
+        windGusts: generatedCondition.windGusts ?? 0,
+        temperature: generatedCondition.temperature ?? 0,
+        waterTemperature: generatedCondition.waterTemperature ?? 0,
+        weatherCode: generatedCondition.weatherCode ?? 0,
+      }) as SurfConditionWithSession
   ) as SurfConditionWithSession[];
 
   try {
@@ -109,17 +119,16 @@ const generateSurfConditions = async (
     for (let entry = 0; entry < marineData.hourly.time.length; entry++) {
       const hourlySessionData: GeneratedSurfCondition = {
         dateTime: marineData.hourly.time[entry].split("T")[1],
-        waveHeight: marineData.hourly.swell_wave_height[entry],
-        waveDirection: marineData.hourly.swell_wave_direction[entry],
-        wavePeriod: Math.round(marineData.hourly.swell_wave_period[entry]),
-        temperature: Math.round(forecastData.hourly.temperature_2m[entry]),
-        waterTemperature: Math.round(
-          forecastData.hourly.soil_temperature_0cm[entry]
-        ),
-        weatherCode: forecastData.hourly.weathercode[entry],
-        windDirection: forecastData.hourly.wind_direction_10m[entry],
-        windGusts: forecastData.hourly.wind_gusts_10m[entry],
-        windSpeed: forecastData.hourly.wind_speed_10m[entry],
+        waveHeight: marineData.hourly.swell_wave_height[entry] ?? 0,
+        waveDirection: marineData.hourly.swell_wave_direction[entry] ?? 0,
+        wavePeriod: Math.round(marineData.hourly.swell_wave_period[entry]) ?? 0,
+        temperature: Math.round(forecastData.hourly.temperature_2m[entry]) ?? 0,
+        waterTemperature:
+          Math.round(forecastData.hourly.soil_temperature_0cm[entry]) ?? 0,
+        weatherCode: forecastData.hourly.weathercode[entry] ?? 0,
+        windDirection: forecastData.hourly.wind_direction_10m[entry] ?? 0,
+        windGusts: forecastData.hourly.wind_gusts_10m[entry] ?? 0,
+        windSpeed: forecastData.hourly.wind_speed_10m[entry] ?? 0,
       };
       sessionData.push(hourlySessionData);
     }

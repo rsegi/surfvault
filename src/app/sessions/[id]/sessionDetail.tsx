@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import {
   Calendar,
@@ -127,10 +127,27 @@ export default function SessionDetailPage({
     return format(session.date, "dd/MM/yyyy");
   };
 
-  // Use useEffect to handle client-side rendering of the map
-  React.useEffect(() => {
+  useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (
+      session &&
+      session.surfConditions.some(
+        (condition) =>
+          condition.waveHeight === 0 ||
+          condition.waveDirection === 0 ||
+          condition.wavePeriod === 0 ||
+          condition.temperature === 0 ||
+          condition.waterTemperature === 0
+      )
+    ) {
+      toast.warning(
+        "Algunas de las condiciones de la sesión no se han podido generar."
+      );
+    }
+  }, [session]);
 
   return (
     <div className="container mx-auto px-4 py-8">

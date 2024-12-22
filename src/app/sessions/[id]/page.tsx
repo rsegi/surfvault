@@ -1,7 +1,11 @@
 import { getSessionById } from "api/session/session";
-import SessionDetailPage from "./sessionDetail";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import dynamic from "next/dynamic";
+
+const SessionDetailPage = dynamic(() => import("./sessionDetail"), {
+  ssr: false,
+});
 
 export default async function SessionDetail({
   params,
